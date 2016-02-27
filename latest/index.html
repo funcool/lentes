@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>lentes - lenses for clojure(script)</title>
+<style>
+.listingblock .pygments .hll { background-color: #ffffcc }
+.listingblock .pygments  { background: #f0f0f0; }
+.listingblock .pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
+.listingblock .pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+.listingblock .pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
+.listingblock .pygments .tok-o { color: #666666 } /* Operator */
+.listingblock .pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+.listingblock .pygments .tok-cp { color: #007020 } /* Comment.Preproc */
+.listingblock .pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+.listingblock .pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+.listingblock .pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
+.listingblock .pygments .tok-ge { font-style: italic } /* Generic.Emph */
+.listingblock .pygments .tok-gr { color: #FF0000 } /* Generic.Error */
+.listingblock .pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.listingblock .pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
+.listingblock .pygments .tok-go { color: #888888 } /* Generic.Output */
+.listingblock .pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+.listingblock .pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+.listingblock .pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.listingblock .pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+.listingblock .pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+.listingblock .pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+.listingblock .pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+.listingblock .pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
+.listingblock .pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+.listingblock .pygments .tok-kt { color: #902000 } /* Keyword.Type */
+.listingblock .pygments .tok-m { color: #40a070 } /* Literal.Number */
+.listingblock .pygments .tok-s { color: #4070a0 } /* Literal.String */
+.listingblock .pygments .tok-na { color: #4070a0 } /* Name.Attribute */
+.listingblock .pygments .tok-nb { color: #007020 } /* Name.Builtin */
+.listingblock .pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+.listingblock .pygments .tok-no { color: #60add5 } /* Name.Constant */
+.listingblock .pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
+.listingblock .pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
+.listingblock .pygments .tok-ne { color: #007020 } /* Name.Exception */
+.listingblock .pygments .tok-nf { color: #06287e } /* Name.Function */
+.listingblock .pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
+.listingblock .pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+.listingblock .pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
+.listingblock .pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
+.listingblock .pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
+.listingblock .pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+.listingblock .pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
+.listingblock .pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
+.listingblock .pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
+.listingblock .pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
+.listingblock .pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
+.listingblock .pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
+.listingblock .pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
+.listingblock .pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+.listingblock .pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
+.listingblock .pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+.listingblock .pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
+.listingblock .pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+.listingblock .pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
+.listingblock .pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
+.listingblock .pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
+.listingblock .pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
+.listingblock .pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
+.listingblock .pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
+.listingblock .pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
+.listingblock .pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
+.listingblock .pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic|Liberation+Mono:400|Roboto+Slab:400,700"/>
+<link rel="stylesheet" href="https://www.niwi.nz/_assets/asciidoctor-styles/simple-red-titles/stylesheet.css"/>
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<h1>lentes - lenses for clojure(script)</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#introduction">Introduction</a>
+<ul class="sectlevel2">
+<li><a href="#project-maturity">Project Maturity</a></li>
+<li><a href="#install">Install</a></li>
+</ul>
+</li>
+<li><a href="#user-guide">User Guide</a>
+<ul class="sectlevel2">
+<li><a href="#first-steps">First steps</a></li>
+<li><a href="#lenses-composition">Lenses composition</a></li>
+<li><a href="#builtin-lenses">Builtin lenses</a></li>
+<li><a href="#interoperability">Interoperability</a></li>
+</ul>
+</li>
+<li><a href="#faq">FAQ</a></li>
+<li><a href="#developers-guide">Developers Guide</a>
+<ul class="sectlevel2">
+<li><a href="#philosophy">Philosophy</a></li>
+<li><a href="#contributing">Contributing</a></li>
+<li><a href="#source-code">Source Code</a></li>
+<li><a href="#run-tests">Run tests</a></li>
+<li><a href="#license">License</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="introduction"><a class="link" href="#introduction">Introduction</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This is an implementation of functional references modeled as functions (in the
+same way as transducers).</p>
+</div>
+<div class="paragraph">
+<p>Functional reference or lense is a generalization of get and put mapping to the
+particular part of a data structure, where the result is called <em>view</em> or <em>focus</em>
+and the container is usually called <em>source</em>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+This documentation does not covers all api, so if you miss some function,
+contributions are very welcome. You can see the full <a href="api/index.html#id">API documentation here</a>.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="project-maturity"><a class="link" href="#project-maturity">Project Maturity</a></h3>
+<div class="paragraph">
+<p>Since <em>lentes</em> is a young project there can be some API breakage.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="install"><a class="link" href="#install">Install</a></h3>
+<div class="paragraph">
+<p>The simplest way to use <em>lentes</em> in a clojure project, is by including it in the
+dependency vector on your <strong><em>project.clj</em></strong> file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">[</span><span class="tok-nv">funcool/lentes</span> <span class="tok-s">&quot;0.6.1&quot;</span><span class="tok-p">]</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="user-guide"><a class="link" href="#user-guide">User Guide</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="first-steps"><a class="link" href="#first-steps">First steps</a></h3>
+<div class="paragraph">
+<p>We&#8217;ll start by using the most basic lens, the identity lens. We can get the value
+a lens is focused on using the <code>focus</code> function in <code>cats.labs.lens</code> ns:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">require</span> <span class="tok-o">&#39;</span><span class="tok-p">[</span><span class="tok-nv">cats.labs.lens</span> <span class="tok-ss">:as</span> <span class="tok-nv">l</span><span class="tok-p">])</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/focus</span> <span class="tok-nv">l/id</span> <span class="tok-p">[</span><span class="tok-mi">0</span> <span class="tok-mi">1</span> <span class="tok-mi">2</span> <span class="tok-mi">3</span><span class="tok-p">])</span>
+<span class="tok-c1">;; =&gt; [0 1 2 3]</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We have two other primitives available: the <code>put</code> operation and <code>over</code>, which lets
+us apply a function over the focused value of a lens:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">l/put</span> <span class="tok-nv">l/id</span> <span class="tok-mi">42</span> <span class="tok-p">[</span><span class="tok-mi">0</span> <span class="tok-mi">1</span> <span class="tok-mi">2</span> <span class="tok-mi">3</span><span class="tok-p">])</span>
+<span class="tok-c1">;; =&gt; 42</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/over</span> <span class="tok-nv">l/id</span> <span class="tok-nb">count </span><span class="tok-p">[</span><span class="tok-mi">0</span> <span class="tok-mi">1</span> <span class="tok-mi">2</span> <span class="tok-mi">3</span><span class="tok-p">])</span>
+<span class="tok-c1">;; =&gt; 4</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>There are some builtin lenses that can be used out of the box such as <code>fst</code>, <code>snd</code>
+and <code>nth</code>. Let see some examples on how them can be used:</p>
+</div>
+<div class="listingblock">
+<div class="title">Example using <code>fst</code> lense</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-c1">;; Focus over the first element of a vector</span>
+<span class="tok-p">(</span><span class="tok-nf">l/focus</span> <span class="tok-nv">l/fst</span> <span class="tok-p">[</span><span class="tok-mi">1</span> <span class="tok-mi">2</span> <span class="tok-mi">3</span><span class="tok-p">])</span>
+<span class="tok-c1">;; =&gt; 1</span>
+
+<span class="tok-c1">;; Apply a function over first element of a vector</span>
+<span class="tok-p">(</span><span class="tok-nf">l/over</span> <span class="tok-nv">l/fst</span> <span class="tok-nb">inc </span><span class="tok-p">[</span><span class="tok-mi">1</span> <span class="tok-mi">2</span> <span class="tok-mi">3</span><span class="tok-p">])</span>
+<span class="tok-c1">;; =&gt; [2 2 3]</span>
+
+<span class="tok-c1">;; Replace the first value of an element of a vector</span>
+<span class="tok-p">(</span><span class="tok-nf">l/put</span> <span class="tok-nv">l/fst</span> <span class="tok-mi">42</span> <span class="tok-p">[</span><span class="tok-mi">1</span> <span class="tok-mi">2</span> <span class="tok-mi">3</span><span class="tok-p">])</span>
+<span class="tok-c1">;; =&gt; [42 2 3]</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Example using the <code>nth</code> lense</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">l/focus</span> <span class="tok-p">(</span><span class="tok-nf">l/nth</span> <span class="tok-mi">2</span><span class="tok-p">)</span> <span class="tok-p">[</span><span class="tok-mi">1</span> <span class="tok-mi">2</span> <span class="tok-mi">3</span><span class="tok-p">])</span>
+<span class="tok-c1">;; =&gt; 3</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/over</span> <span class="tok-p">(</span><span class="tok-nf">l/nth</span> <span class="tok-mi">2</span><span class="tok-p">)</span> <span class="tok-nb">inc </span><span class="tok-p">[</span><span class="tok-mi">1</span> <span class="tok-mi">2</span> <span class="tok-mi">3</span><span class="tok-p">])</span>
+<span class="tok-c1">;; =&gt; [1 2 4]</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/put</span> <span class="tok-p">(</span><span class="tok-nf">l/nth</span> <span class="tok-mi">2</span><span class="tok-p">)</span> <span class="tok-mi">42</span> <span class="tok-p">[</span><span class="tok-mi">1</span> <span class="tok-mi">2</span> <span class="tok-mi">3</span><span class="tok-p">])</span>
+<span class="tok-c1">;; =&gt; [1 2 42]</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="lenses-composition"><a class="link" href="#lenses-composition">Lenses composition</a></h3>
+<div class="paragraph">
+<p>One of the big advantatges of the lenses implementation of cats library is that
+them are implemented using plain functions:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">my-lens</span> <span class="tok-p">(</span><span class="tok-nb">comp </span><span class="tok-nv">l/fst</span> <span class="tok-nv">l/fst</span> <span class="tok-p">(</span><span class="tok-nf">l/nth</span> <span class="tok-mi">2</span><span class="tok-p">)))</span>
+
+<span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">data</span>
+  <span class="tok-p">[[</span><span class="tok-mi">0</span> <span class="tok-mi">1</span> <span class="tok-mi">2</span><span class="tok-p">]</span>
+   <span class="tok-p">[</span><span class="tok-mi">3</span> <span class="tok-mi">4</span> <span class="tok-mi">5</span><span class="tok-p">]])</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/focus</span> <span class="tok-nv">my-lens</span> <span class="tok-nv">data</span><span class="tok-p">)</span>
+<span class="tok-c1">;; =&gt; 2</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/put</span> <span class="tok-nv">my-lens</span> <span class="tok-mi">42</span> <span class="tok-nv">data</span><span class="tok-p">)</span>
+<span class="tok-c1">;; =&gt; [[0 1 42] [3 4 5]]</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Lenses compose with regular function composition and, like transducers, the
+combined lens runs from left to right.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="builtin-lenses"><a class="link" href="#builtin-lenses">Builtin lenses</a></h3>
+<div class="paragraph">
+<p>There&#8217;s <code>key</code> and <code>select-keys</code> for focusing on one or multiple keys respectively:</p>
+</div>
+<div class="listingblock">
+<div class="title">Example focusing in a specific key/keys of associative data structure</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">l/focus</span> <span class="tok-p">(</span><span class="tok-nf">l/key</span> <span class="tok-ss">:a</span><span class="tok-p">)</span> <span class="tok-p">{</span><span class="tok-ss">:a</span> <span class="tok-mi">1</span> <span class="tok-ss">:b</span> <span class="tok-mi">2</span><span class="tok-p">})</span>
+<span class="tok-c1">;; =&gt; 1</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/over</span> <span class="tok-p">(</span><span class="tok-nf">l/key</span> <span class="tok-ss">:a</span><span class="tok-p">)</span> <span class="tok-nb">str </span><span class="tok-p">{</span><span class="tok-ss">:a</span> <span class="tok-mi">1</span> <span class="tok-ss">:b</span> <span class="tok-mi">2</span><span class="tok-p">})</span>
+<span class="tok-c1">;; =&gt; {:a &quot;1&quot;, :b 2}</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/put</span> <span class="tok-p">(</span><span class="tok-nf">l/key</span> <span class="tok-ss">:a</span><span class="tok-p">)</span> <span class="tok-mi">42</span> <span class="tok-p">{</span><span class="tok-ss">:a</span> <span class="tok-mi">1</span> <span class="tok-ss">:b</span> <span class="tok-mi">2</span><span class="tok-p">})</span>
+<span class="tok-c1">;; =&gt; {:a 42, :b 2}</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/focus</span> <span class="tok-p">(</span><span class="tok-nf">l/select-keys</span> <span class="tok-p">[</span><span class="tok-ss">:a</span><span class="tok-p">])</span> <span class="tok-p">{</span><span class="tok-ss">:a</span> <span class="tok-mi">1</span> <span class="tok-ss">:b</span> <span class="tok-mi">2</span><span class="tok-p">})</span>
+<span class="tok-c1">;; =&gt; {:a 1}</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/over</span> <span class="tok-p">(</span><span class="tok-nf">l/select-keys</span> <span class="tok-p">[</span><span class="tok-ss">:a</span> <span class="tok-ss">:c</span><span class="tok-p">])</span>
+        <span class="tok-p">(</span><span class="tok-k">fn </span><span class="tok-p">[</span><span class="tok-nv">m</span><span class="tok-p">]</span>
+         <span class="tok-p">(</span><span class="tok-nb">zipmap </span><span class="tok-p">(</span><span class="tok-nb">keys </span><span class="tok-nv">m</span><span class="tok-p">)</span> <span class="tok-p">(</span><span class="tok-nb">repeat </span><span class="tok-mi">42</span><span class="tok-p">)))</span>
+        <span class="tok-p">{</span><span class="tok-ss">:a</span> <span class="tok-mi">1</span> <span class="tok-ss">:b</span> <span class="tok-mi">2</span><span class="tok-p">})</span>
+<span class="tok-c1">;; =&gt; {:b 2, :a 42}</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/put</span> <span class="tok-p">(</span><span class="tok-nf">l/select-keys</span> <span class="tok-p">[</span><span class="tok-ss">:a</span> <span class="tok-ss">:c</span><span class="tok-p">])</span>
+       <span class="tok-p">{</span><span class="tok-ss">:a</span> <span class="tok-mi">0</span><span class="tok-p">}</span>
+       <span class="tok-p">{</span><span class="tok-ss">:a</span> <span class="tok-mi">1</span> <span class="tok-ss">:b</span> <span class="tok-mi">2</span> <span class="tok-ss">:c</span> <span class="tok-mi">42</span><span class="tok-p">})</span>
+<span class="tok-c1">;; =&gt; {:b 2, :a 0}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>in</code> for focusing on a path:</p>
+</div>
+<div class="listingblock">
+<div class="title">Example focusing in neest data structures</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">l/focus</span> <span class="tok-p">(</span><span class="tok-nf">l/in</span> <span class="tok-p">[</span><span class="tok-ss">:a</span> <span class="tok-ss">:b</span><span class="tok-p">])</span>
+         <span class="tok-p">{</span><span class="tok-ss">:a</span> <span class="tok-p">{</span><span class="tok-ss">:b</span> <span class="tok-p">{</span><span class="tok-ss">:c</span> <span class="tok-mi">42</span><span class="tok-p">}}})</span>
+<span class="tok-c1">;; =&gt; {:c 42}</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/over</span> <span class="tok-p">(</span><span class="tok-nf">l/in</span> <span class="tok-p">[</span><span class="tok-ss">:a</span> <span class="tok-ss">:b</span><span class="tok-p">])</span> <span class="tok-o">#</span><span class="tok-p">(</span><span class="tok-nb">zipmap </span><span class="tok-p">(</span><span class="tok-nb">vals </span><span class="tok-nv">%</span><span class="tok-p">)</span> <span class="tok-p">(</span><span class="tok-nb">keys </span><span class="tok-nv">%</span><span class="tok-p">))</span>
+        <span class="tok-p">{</span><span class="tok-ss">:a</span> <span class="tok-p">{</span><span class="tok-ss">:b</span> <span class="tok-p">{</span><span class="tok-ss">:c</span> <span class="tok-mi">42</span><span class="tok-p">}}})</span>
+<span class="tok-c1">;; =&gt; {:a {:b {42 :c}}}</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/put</span> <span class="tok-p">(</span><span class="tok-nf">l/in</span> <span class="tok-p">[</span><span class="tok-ss">:a</span> <span class="tok-ss">:b</span><span class="tok-p">])</span>
+       <span class="tok-mi">42</span>
+       <span class="tok-p">{</span><span class="tok-ss">:a</span> <span class="tok-p">{</span><span class="tok-ss">:b</span> <span class="tok-p">{</span><span class="tok-ss">:c</span> <span class="tok-mi">42</span><span class="tok-p">}}})</span>
+<span class="tok-c1">;; =&gt; {:a {:b 42}}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s take a look at a combinator that will let us build a unit-conversion lens
+called <code>units</code>. We have to supply a function to convert from unit <code>a</code> to unit <code>b</code>
+and viceversa:</p>
+</div>
+<div class="listingblock">
+<div class="title">Example definiting a "unit conversion" lense</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-kd">defn </span><span class="tok-nv">sec-&gt;min</span> <span class="tok-p">[</span><span class="tok-nv">sec</span><span class="tok-p">]</span> <span class="tok-p">(</span><span class="tok-nb">/ </span><span class="tok-nv">sec</span> <span class="tok-mi">60</span><span class="tok-p">))</span>
+<span class="tok-p">(</span><span class="tok-kd">defn </span><span class="tok-nv">min-&gt;sec</span> <span class="tok-p">[</span><span class="tok-nv">min</span><span class="tok-p">]</span> <span class="tok-p">(</span><span class="tok-nb">* min </span><span class="tok-mi">60</span><span class="tok-p">))</span>
+
+<span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">mins</span> <span class="tok-p">(</span><span class="tok-nf">l/units</span> <span class="tok-nv">sec-&gt;min</span>
+                   <span class="tok-nv">min-&gt;sec</span><span class="tok-p">))</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/focus</span> <span class="tok-nv">mins</span> <span class="tok-mi">120</span><span class="tok-p">)</span>
+<span class="tok-c1">;; =&gt; 2</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/put</span> <span class="tok-nv">mins</span> <span class="tok-mi">3</span> <span class="tok-mi">120</span><span class="tok-p">)</span>
+<span class="tok-c1">;; =&gt; 180</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/over</span> <span class="tok-nv">mins</span> <span class="tok-nb">inc </span><span class="tok-mi">60</span><span class="tok-p">)</span>
+<span class="tok-c1">;; =&gt; 120</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And conditional lenses that can be defined using a predicate function and
+returns a lens that focuses in an element only if it passes the predicate:</p>
+</div>
+<div class="listingblock">
+<div class="title">Example focusing using conditional lenses</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">l/focus</span> <span class="tok-p">(</span><span class="tok-nf">l/passes</span> <span class="tok-nv">even?</span><span class="tok-p">)</span> <span class="tok-mi">2</span><span class="tok-p">)</span>
+<span class="tok-c1">;; =&gt; 2</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/over</span> <span class="tok-p">(</span><span class="tok-nf">l/passes</span> <span class="tok-nv">even?</span><span class="tok-p">)</span> <span class="tok-nb">inc </span><span class="tok-mi">2</span><span class="tok-p">)</span>
+<span class="tok-c1">;; =&gt; 3</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/put</span> <span class="tok-p">(</span><span class="tok-nf">l/passes</span> <span class="tok-nv">even?</span><span class="tok-p">)</span> <span class="tok-mi">42</span> <span class="tok-mi">2</span><span class="tok-p">)</span>
+<span class="tok-c1">;; =&gt; 42</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/focus</span> <span class="tok-p">(</span><span class="tok-nf">l/passes</span> <span class="tok-nv">even?</span><span class="tok-p">)</span> <span class="tok-mi">1</span><span class="tok-p">)</span>
+<span class="tok-c1">;; =&gt; nil</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/over</span> <span class="tok-p">(</span><span class="tok-nf">l/passes</span> <span class="tok-nv">even?</span><span class="tok-p">)</span> <span class="tok-nb">inc </span><span class="tok-mi">1</span><span class="tok-p">)</span>
+<span class="tok-c1">;; =&gt; 1</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/put</span> <span class="tok-p">(</span><span class="tok-nf">l/passes</span> <span class="tok-nv">even?</span><span class="tok-p">)</span> <span class="tok-mi">42</span> <span class="tok-mi">1</span><span class="tok-p">)</span>
+<span class="tok-c1">;; =&gt; 1</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="interoperability"><a class="link" href="#interoperability">Interoperability</a></h3>
+<div class="paragraph">
+<p>There are also <code>Focus</code> type that allows you to derive atom like objects from
+clojure atoms focusing to a specific portion of it using lenses.</p>
+</div>
+<div class="paragraph">
+<p>Let see an example focusing on a concrete set of keys on an asociative
+data structure referenced by an atom:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">state</span> <span class="tok-p">(</span><span class="tok-nf">atom</span> <span class="tok-p">{</span><span class="tok-ss">:x</span> <span class="tok-mi">1</span> <span class="tok-ss">:y</span> <span class="tok-mi">2</span> <span class="tok-ss">:z</span> <span class="tok-mi">3</span><span class="tok-p">}))</span>
+
+<span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">state-d</span>
+  <span class="tok-p">(</span><span class="tok-nf">l/focus-atom</span> <span class="tok-p">(</span><span class="tok-nf">l/select-keys</span> <span class="tok-p">[</span><span class="tok-ss">:x</span> <span class="tok-ss">:y</span><span class="tok-p">])</span> <span class="tok-nv">state</span><span class="tok-p">))</span>
+
+<span class="tok-o">@</span><span class="tok-nv">state-d</span>
+<span class="tok-c1">;; =&gt; {:x 1 :y 2}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The object returned by <code>focus-atom</code> function behaves identically to a clojure
+atom and it can be treated as drop in replacement of it:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">swap!</span> <span class="tok-nv">state-d</span> <span class="tok-nv">update</span> <span class="tok-ss">:x</span> <span class="tok-nv">inc</span><span class="tok-p">)</span>
+
+<span class="tok-o">@</span><span class="tok-nv">state</span>
+<span class="tok-c1">;; =&gt; {:x 2 :y 2 :z 3}</span>
+
+<span class="tok-o">@</span><span class="tok-nv">state-d</span>
+<span class="tok-c1">;; =&gt; {:x 2 :y 2}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And do not forget that you also can attach watchers to focused atoms in the same
+way as you will do that with clojure(script) atoms.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="faq"><a class="link" href="#faq">FAQ</a></h2>
+<div class="sectionbody">
+
+</div>
+</div>
+<div class="sect1">
+<h2 id="developers-guide"><a class="link" href="#developers-guide">Developers Guide</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="philosophy"><a class="link" href="#philosophy">Philosophy</a></h3>
+<div class="paragraph">
+<p>Five most important rules:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Beautiful is better than ugly.</p>
+</li>
+<li>
+<p>Explicit is better than implicit.</p>
+</li>
+<li>
+<p>Simple is better than complex.</p>
+</li>
+<li>
+<p>Complex is better than complicated.</p>
+</li>
+<li>
+<p>Readability counts.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>All contributions to <em>lentes</em> should keep these important rules in mind.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="contributing"><a class="link" href="#contributing">Contributing</a></h3>
+<div class="paragraph">
+<p>Please read <code>CONTRIBUTING.md</code> file on the root of repository.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="source-code"><a class="link" href="#source-code">Source Code</a></h3>
+<div class="paragraph">
+<p><em>lentes</em> is open source and can be found on
+<a href="https://github.com/funcool/lentes">github</a>.</p>
+</div>
+<div class="paragraph">
+<p>You can clone the public repository with this command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text">git clone https://github.com/funcool/lentes</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="run-tests"><a class="link" href="#run-tests">Run tests</a></h3>
+<div class="paragraph">
+<p>For running tests just execute this:</p>
+</div>
+<div class="listingblock">
+<div class="title">Run tests on node platform</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text">./scrpts/build
+node ./out/tests.js</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Run tests on jvm platform</div>
+<div class="content">
+<pre>lein test</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="license"><a class="link" href="#license">License</a></h3>
+<div class="paragraph">
+<p><em>lentes</em> is under public domain:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>This is free and unencumbered software released into the public domain.
+
+Anyone is free to copy, modify, publish, use, compile, sell, or
+distribute this software, either in source code form or as a compiled
+binary, for any purpose, commercial or non-commercial, and by any
+means.
+
+In jurisdictions that recognize copyright laws, the author or authors
+of this software dedicate any and all copyright interest in the
+software to the public domain. We make this dedication for the benefit
+of the public at large and to the detriment of our heirs and
+successors. We intend this dedication to be an overt act of
+relinquishment in perpetuity of all present and future rights to this
+software under copyright law.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+For more information, please refer to &lt;http://unlicense.org/&gt;</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2016-02-26 08:46:40 EET
+</div>
+</div>
+</body>
+</html>
