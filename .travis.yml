@@ -1,0 +1,21 @@
+language: clojure
+sudo: false
+lein: lein
+
+script:
+  - ./scripts/build
+  - node out/tests.js
+
+branches:
+  only:
+    - master
+
+jdk:
+  - oraclejdk8
+
+notifications:
+  email:
+    recipients:
+      - niwi@niwi.nz
+    on_success: change
+    on_failure: change

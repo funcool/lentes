@@ -1,0 +1,341 @@
+= lentes - lenses for clojure(script)
+:toc: left
+:!numbered:
+:idseparator: -
+:idprefix:
+:source-highlighter: pygments
+:pygments-style: friendly
+:sectlinks:
+
+
+== Introduction
+
+This is an implementation of functional references modeled as functions (in the
+same way as transducers).
+
+Functional reference or lense is a generalization of get and put mapping to the
+particular part of a data structure, where the result is called _view_ or _focus_
+and the container is usually called _source_.
+
+NOTE: This documentation does not covers all api, so if you miss some function,
+contributions are very welcome. You can see the full link:api/index.html#id[API documentation here].
+
+
+=== Project Maturity
+
+Since _lentes_ is a young project there can be some API breakage.
+
+
+=== Install
+
+The simplest way to use _lentes_ in a clojure project, is by including it in the
+dependency vector on your *_project.clj_* file:
+
+[source, clojure]
+----
+[funcool/lentes "0.6.1"]
+----
+
+
+== User Guide
+
+=== First steps
+
+We'll start by using the most basic lens, the identity lens. We can get the value
+a lens is focused on using the `focus` function in `cats.labs.lens` ns:
+
+[source, clojure]
+----
+(require '[cats.labs.lens :as l])
+
+(l/focus l/id [0 1 2 3])
+;; => [0 1 2 3]
+----
+
+We have two other primitives available: the `put` operation and `over`, which lets
+us apply a function over the focused value of a lens:
+
+[source, clojure]
+----
+(l/put l/id 42 [0 1 2 3])
+;; => 42
+
+(l/over l/id count [0 1 2 3])
+;; => 4
+----
+
+There are some builtin lenses that can be used out of the box such as `fst`, `snd`
+and `nth`. Let see some examples on how them can be used:
+
+.Example using `fst` lense
+[source, clojure]
+----
+;; Focus over the first element of a vector
+(l/focus l/fst [1 2 3])
+;; => 1
+
+;; Apply a function over first element of a vector
+(l/over l/fst inc [1 2 3])
+;; => [2 2 3]
+
+;; Replace the first value of an element of a vector
+(l/put l/fst 42 [1 2 3])
+;; => [42 2 3]
+----
+
+.Example using the `nth` lense
+[source, clojure]
+----
+(l/focus (l/nth 2) [1 2 3])
+;; => 3
+
+(l/over (l/nth 2) inc [1 2 3])
+;; => [1 2 4]
+
+(l/put (l/nth 2) 42 [1 2 3])
+;; => [1 2 42]
+----
+
+
+=== Lenses composition
+
+One of the big advantatges of the lenses implementation of cats library is that
+them are implemented using plain functions:
+
+[source, clojure]
+----
+(def my-lens (comp l/fst l/fst (l/nth 2)))
+
+(def data
+  [[0 1 2]
+   [3 4 5]])
+
+(l/focus my-lens data)
+;; => 2
+
+(l/put my-lens 42 data)
+;; => [[0 1 42] [3 4 5]]
+----
+
+Lenses compose with regular function composition and, like transducers, the
+combined lens runs from left to right.
+
+
+=== Builtin lenses
+
+There's `key` and `select-keys` for focusing on one or multiple keys respectively:
+
+.Example focusing in a specific key/keys of associative data structure
+[source, clojure]
+----
+(l/focus (l/key :a) {:a 1 :b 2})
+;; => 1
+
+(l/over (l/key :a) str {:a 1 :b 2})
+;; => {:a "1", :b 2}
+
+(l/put (l/key :a) 42 {:a 1 :b 2})
+;; => {:a 42, :b 2}
+
+(l/focus (l/select-keys [:a]) {:a 1 :b 2})
+;; => {:a 1}
+
+(l/over (l/select-keys [:a :c])
+        (fn [m]
+         (zipmap (keys m) (repeat 42)))
+        {:a 1 :b 2})
+;; => {:b 2, :a 42}
+
+(l/put (l/select-keys [:a :c])
+       {:a 0}
+       {:a 1 :b 2 :c 42})
+;; => {:b 2, :a 0}
+----
+
+`in` for focusing on a path:
+
+.Example focusing in neest data structures
+[source, clojure]
+----
+(l/focus (l/in [:a :b])
+         {:a {:b {:c 42}}})
+;; => {:c 42}
+
+(l/over (l/in [:a :b]) #(zipmap (vals %) (keys %))
+        {:a {:b {:c 42}}})
+;; => {:a {:b {42 :c}}}
+
+(l/put (l/in [:a :b])
+       42
+       {:a {:b {:c 42}}})
+;; => {:a {:b 42}}
+----
+
+Let's take a look at a combinator that will let us build a unit-conversion lens
+called `units`. We have to supply a function to convert from unit `a` to unit `b`
+and viceversa:
+
+.Example definiting a "unit conversion" lense
+[source, clojure]
+----
+(defn sec->min [sec] (/ sec 60))
+(defn min->sec [min] (* min 60))
+
+(def mins (l/units sec->min
+                   min->sec))
+
+(l/focus mins 120)
+;; => 2
+
+(l/put mins 3 120)
+;; => 180
+
+(l/over mins inc 60)
+;; => 120
+----
+
+And conditional lenses that can be defined using a predicate function and
+returns a lens that focuses in an element only if it passes the predicate:
+
+.Example focusing using conditional lenses
+[source, clojure]
+----
+(l/focus (l/passes even?) 2)
+;; => 2
+
+(l/over (l/passes even?) inc 2)
+;; => 3
+
+(l/put (l/passes even?) 42 2)
+;; => 42
+
+(l/focus (l/passes even?) 1)
+;; => nil
+
+(l/over (l/passes even?) inc 1)
+;; => 1
+
+(l/put (l/passes even?) 42 1)
+;; => 1
+----
+
+=== Interoperability
+
+There are also `Focus` type that allows you to derive atom like objects from
+clojure atoms focusing to a specific portion of it using lenses.
+
+Let see an example focusing on a concrete set of keys on an asociative
+data structure referenced by an atom:
+
+[source, clojure]
+----
+(def state (atom {:x 1 :y 2 :z 3}))
+
+(def state-d
+  (l/focus-atom (l/select-keys [:x :y]) state))
+
+@state-d
+;; => {:x 1 :y 2}
+----
+
+The object returned by `focus-atom` function behaves identically to a clojure
+atom and it can be treated as drop in replacement of it:
+
+[source, clojure]
+----
+(swap! state-d update :x inc)
+
+@state
+;; => {:x 2 :y 2 :z 3}
+
+@state-d
+;; => {:x 2 :y 2}
+----
+
+And do not forget that you also can attach watchers to focused atoms in the same
+way as you will do that with clojure(script) atoms.
+
+
+== FAQ
+
+
+== Developers Guide
+
+=== Philosophy
+
+Five most important rules:
+
+- Beautiful is better than ugly.
+- Explicit is better than implicit.
+- Simple is better than complex.
+- Complex is better than complicated.
+- Readability counts.
+
+All contributions to _lentes_ should keep these important rules in mind.
+
+
+=== Contributing
+
+Please read `CONTRIBUTING.md` file on the root of repository.
+
+
+=== Source Code
+
+_lentes_ is open source and can be found on
+link:https://github.com/funcool/lentes[github].
+
+You can clone the public repository with this command:
+
+[source,text]
+----
+git clone https://github.com/funcool/lentes
+----
+
+
+=== Run tests
+
+For running tests just execute this:
+
+.Run tests on node platform
+[source, text]
+----
+./scrpts/build
+node ./out/tests.js
+----
+
+.Run tests on jvm platform
+----
+lein test
+----
+
+
+=== License
+
+_lentes_ is under public domain:
+
+----
+This is free and unencumbered software released into the public domain.
+
+Anyone is free to copy, modify, publish, use, compile, sell, or
+distribute this software, either in source code form or as a compiled
+binary, for any purpose, commercial or non-commercial, and by any
+means.
+
+In jurisdictions that recognize copyright laws, the author or authors
+of this software dedicate any and all copyright interest in the
+software to the public domain. We make this dedication for the benefit
+of the public at large and to the detriment of our heirs and
+successors. We intend this dedication to be an overt act of
+relinquishment in perpetuity of all present and future rights to this
+software under copyright law.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+For more information, please refer to <http://unlicense.org/>
+----
