@@ -135,6 +135,12 @@
                 f
                 (clojure.core/select-keys ks))))))
 
+(defn getter
+  "A simple readonly lense that runs arbitrary
+  code on focus."
+  [f]
+  (lens f #(throw (ex-info "Read only lens." {}))))
+
 (defn in
   "Given a path and optionally a default value, return a lens that
   focuses the given path in an associative data structure."
