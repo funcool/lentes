@@ -1,4 +1,4 @@
-(defproject funcool/lentes "1.0.0"
+(defproject funcool/lentes "1.0.1"
   :description "Functional references for Clojure and ClojureScript"
   :url "https://github.com/funcool/lentes"
   :license {:name "Public Domain" :url "http://unlicense.org/"}
