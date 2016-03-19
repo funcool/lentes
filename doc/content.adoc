@@ -33,7 +33,7 @@ dependency vector on your *_project.clj_* file:
 
 [source, clojure]
 ----
-[funcool/lentes "1.0.0"]
+[funcool/lentes "1.0.1"]
 ----
 
 
