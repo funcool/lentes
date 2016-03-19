@@ -218,36 +218,34 @@
 ;; interop
 
 (t/deftest focus-atom
-  (t/testing "Reflects an atoms focused value"
-    (let [source (atom [0 1 2 3 4])
-          fsource (l/focus-atom l/fst source)]
-      (t/is (= @fsource 0))
+  (let [source (atom [0 1 2 3 4])
+        fsource (l/focus-atom l/fst source)]
+    (t/is (= @fsource 0))
 
-      (swap! source #(subvec % 1))
-      (t/is (= @source [1 2 3 4]))
-      (t/is (= @fsource 1))
+    (swap! source #(subvec % 1))
+    (t/is (= @source [1 2 3 4]))
+    (t/is (= @fsource 1))
 
-      (reset! fsource 42)
-      (t/is (= @source [42 2 3 4]))
-      (t/is (= @fsource 42)))))
+    (reset! fsource 42)
+    (t/is (= @source [42 2 3 4]))
+    (t/is (= @fsource 42))))
 
 (t/deftest focus-atom-watches
-  (t/testing "Supports watches"
-    (let [source (atom [0 1 2 3 4])
-          watched (volatile! nil)
-          fsource (l/focus-atom l/fst source)]
-      (add-watch fsource :test (fn [key ref old new]
-                                 (vreset! watched [ref old new])))
+  (let [source (atom [0 1 2 3 4])
+        watched (volatile! nil)
+        fsource (l/focus-atom l/fst source)]
+    (add-watch fsource :test (fn [key ref old new]
+                               (vreset! watched [ref old new])))
 
-      (swap! source #(subvec % 1))
-      (t/is (= @watched
-               [fsource 0 1]))
+    (swap! source #(subvec % 1))
+    (t/is (= @watched
+             [fsource 0 1]))
 
-      (swap! fsource inc)
-      (t/is (= @watched
-               [fsource 1 2]))
+    (swap! fsource inc)
+    (t/is (= @watched
+             [fsource 1 2]))
 
-      (remove-watch fsource :test))))
+    (remove-watch fsource :test)))
 
 #?(:cljs
    (do

@@ -155,84 +155,82 @@
 
 ;; interop
 
-(defn prefix-key
+(defn- prefix-key
   {:internal true :no-doc true}
   [key id]
   (keyword (str id "-" (name key))))
 
-(deftype Focus [id lens a]
-  #?@(:clj
-      [clojure.lang.IDeref
-       (deref [_] (focus lens @a))
+#?(:clj
+   (deftype Focus [id lens source]
+     clojure.lang.IDeref
+     (deref [_] (focus lens @source))
 
-       clojure.lang.IAtom
-       (reset [self newval]
-         (swap! a #(put lens newval %))
-         (deref self))
-       (swap [self f]
-         (swap! a (fn [s] (over lens f s)))
-         (deref self))
-       (swap [self f x]
-         (swap! a (fn [s] (over lens #(f % x) s)))
-         (deref self))
-       (swap [self f x y]
-         (swap! a (fn [s] (over lens #(f % x y) s)))
-         (deref self))
-       (swap [self f x y more]
-         (swap! a (fn [s] (over lens #(apply f % x y more) s)))
-         (deref self))
+     clojure.lang.IAtom
+     (reset [self newval]
+       (swap! source #(put lens newval %))
+       (deref self))
+     (swap [self f]
+       (swap! source (fn [s] (over lens f s)))
+       (deref self))
+     (swap [self f x]
+       (swap! source (fn [s] (over lens #(f % x) s)))
+       (deref self))
+     (swap [self f x y]
+       (swap! source (fn [s] (over lens #(f % x y) s)))
+       (deref self))
+     (swap [self f x y more]
+       (swap! source (fn [s] (over lens #(apply f % x y more) s)))
+       (deref self))
 
-       clojure.lang.IRef
-       (addWatch [self key cb]
-         (let [key (prefix-key key id)]
-           (add-watch a key (fn [key _ oldval newval]
-                              (let [old' (focus lens oldval)
-                                    new' (focus lens newval)]
-                                (if (not= old' new')
-                                  (cb key self old' new')))))))
-       (removeWatch [_ key]
-         (let [key (prefix-key key id)]
-           (remove-watch a key)))]
+     clojure.lang.IRef
+     (addWatch [self key cb]
+       (let [key (prefix-key key id)]
+         (add-watch source key (fn [key _ oldval newval]
+                                 (let [old' (focus lens oldval)
+                                       new' (focus lens newval)]
+                                   (when (not= old' new')
+                                     (cb key self old' new')))))))
+     (removeWatch [_ key]
+       (let [key (prefix-key key id)]
+         (remove-watch source key))))
 
-      :cljs
-      [IDeref
-       (-deref [_] (focus lens @a))
+   :cljs
+   (deftype Focus [id lens source]
+     IDeref
+     (-deref [_] (focus lens @source))
 
-       IWatchable
-       (-add-watch [self key cb]
-         (let [key (prefix-key key id)]
-           (add-watch a key (fn [key _ oldval newval]
-                              (let [old' (focus lens oldval)
-                                    new' (focus lens newval)]
-                                (if (not= old' new')
-                                  (cb key self old' new')))))))
-       (-remove-watch [_ key]
-         (let [key (prefix-key key id)]
-           (remove-watch a key)))
+     IReset
+     (-reset! [self newval]
+       (swap! source #(put lens newval %))
+       (deref self))
 
-       IReset
-       (-reset! [self newval]
-         (swap! a #(put lens newval %))
-         (deref self))
+     ISwap
+     (-swap! [self f]
+       (swap! source (fn [s] (over lens f s)))
+       (deref self))
+     (-swap! [self f x]
+       (swap! source (fn [s] (over lens #(f % x) s)))
+       (deref self))
+     (-swap! [self f x y]
+       (swap! source (fn [s] (over lens #(f % x y) s)))
+       (deref self))
+     (-swap! [self f x y more]
+       (swap! source (fn [s] (over lens #(apply f % x y more) s)))
+       (deref self))
 
-       ISwap
-       (-swap! [self f]
-        (swap! a (fn [s] (over lens f s)))
-        (deref self))
-
-       (-swap! [self f x]
-         (swap! a (fn [s] (over lens #(f % x) s)))
-         (deref self))
-
-       (-swap! [self f x y]
-         (swap! a (fn [s] (over lens #(f % x y) s)))
-         (deref self))
-
-       (-swap! [self f x y more]
-         (swap! a (fn [s] (over lens #(apply f % x y more) s)))
-         (deref self))]))
+     IWatchable
+     (-add-watch [self key cb]
+       (let [key (prefix-key key id)]
+         (add-watch source key (fn [key _ oldval newval]
+                                 (let [old' (focus lens oldval)
+                                       new' (focus lens newval)]
+                                   (when (not= old' new')
+                                     (cb key self old' new')))))))
+     (-remove-watch [_ key]
+       (let [key (prefix-key key id)]
+         (remove-watch source key)))))
 
 (defn focus-atom
-  [lens a]
-  (let [id (str (gensym "cats-lens"))]
-    (Focus. id lens a)))
+  [lens source]
+  (let [id (str (gensym "lentes"))]
+    (Focus. id lens source)))
