@@ -94,7 +94,6 @@
 <li><a href="#interoperability">Interoperability</a></li>
 </ul>
 </li>
-<li><a href="#faq">FAQ</a></li>
 <li><a href="#developers-guide">Developers Guide</a>
 <ul class="sectlevel2">
 <li><a href="#philosophy">Philosophy</a></li>
@@ -160,11 +159,11 @@ dependency vector on your <strong><em>project.clj</em></strong> file:</p>
 <h3 id="first-steps"><a class="link" href="#first-steps">First steps</a></h3>
 <div class="paragraph">
 <p>We&#8217;ll start by using the most basic lens, the identity lens. We can get the value
-a lens is focused on using the <code>focus</code> function in <code>cats.labs.lens</code> ns:</p>
+a lens is focused on using the <code>focus</code> function in <code>lentes.core</code> ns:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">require</span> <span class="tok-o">&#39;</span><span class="tok-p">[</span><span class="tok-nv">cats.labs.lens</span> <span class="tok-ss">:as</span> <span class="tok-nv">l</span><span class="tok-p">])</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">require</span> <span class="tok-o">&#39;</span><span class="tok-p">[</span><span class="tok-nv">lentes.core</span> <span class="tok-ss">:as</span> <span class="tok-nv">l</span><span class="tok-p">])</span>
 
 <span class="tok-p">(</span><span class="tok-nf">l/focus</span> <span class="tok-nv">l/id</span> <span class="tok-p">[</span><span class="tok-mi">0</span> <span class="tok-mi">1</span> <span class="tok-mi">2</span> <span class="tok-mi">3</span><span class="tok-p">])</span>
 <span class="tok-c1">;; =&gt; [0 1 2 3]</span></code></pre>
@@ -390,12 +389,6 @@ way as you will do that with clojure(script) atoms.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="faq"><a class="link" href="#faq">FAQ</a></h2>
-<div class="sectionbody">
-
-</div>
-</div>
-<div class="sect1">
 <h2 id="developers-guide"><a class="link" href="#developers-guide">Developers Guide</a></h2>
 <div class="sectionbody">
 <div class="sect2">
@@ -455,7 +448,7 @@ way as you will do that with clojure(script) atoms.</p>
 <div class="listingblock">
 <div class="title">Run tests on node platform</div>
 <div class="content">
-<pre class="pygments highlight"><code data-lang="text">./scrpts/build
+<pre class="pygments highlight"><code data-lang="text">./scripts/build
 node ./out/tests.js</code></pre>
 </div>
 </div>
@@ -505,7 +498,7 @@ For more information, please refer to &lt;http://unlicense.org/&gt;</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2016-03-19 23:43:54 EET
+Last updated 2016-06-17 08:28:20 EEST
 </div>
 </div>
 </body>
