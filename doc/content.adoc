@@ -42,11 +42,11 @@ dependency vector on your *_project.clj_* file:
 === First steps
 
 We'll start by using the most basic lens, the identity lens. We can get the value
-a lens is focused on using the `focus` function in `cats.labs.lens` ns:
+a lens is focused on using the `focus` function in `lentes.core` ns:
 
 [source, clojure]
 ----
-(require '[cats.labs.lens :as l])
+(require '[lentes.core :as l])
 
 (l/focus l/id [0 1 2 3])
 ;; => [0 1 2 3]
@@ -219,6 +219,7 @@ returns a lens that focuses in an element only if it passes the predicate:
 ;; => 1
 ----
 
+
 === Interoperability
 
 There are also `Focus` type that allows you to derive atom like objects from
@@ -254,9 +255,6 @@ atom and it can be treated as drop in replacement of it:
 
 And do not forget that you also can attach watchers to focused atoms in the same
 way as you will do that with clojure(script) atoms.
-
-
-== FAQ
 
 
 == Developers Guide
@@ -299,7 +297,7 @@ For running tests just execute this:
 .Run tests on node platform
 [source, text]
 ----
-./scrpts/build
+./scripts/build
 node ./out/tests.js
 ----
 
