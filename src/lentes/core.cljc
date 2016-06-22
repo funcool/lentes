@@ -144,9 +144,12 @@
 
 (defn getter
   "A simple readonly lense that runs arbitrary
-  code on focus."
+  code on focus.
+  DEPRECATED: use `lens` function that now has the
+  setter as optional parameter."
+  {:deprecated true}
   [f]
-  (lens f #(throw (ex-info "Read only lens." {}))))
+  (lens f))
 
 (defn in
   "Given a path and optionally a default value, return a lens that
