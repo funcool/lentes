@@ -10,12 +10,12 @@
 
 == Introduction
 
-This is an implementation of functional references modeled as functions (in the
-same way as transducers).
+This is an implementation of functional references modeled as functions (in the same
+way as transducers). Is a generalization of get and put mapping to the particular
+part of a data structure.
 
-Functional reference or lense is a generalization of get and put mapping to the
-particular part of a data structure, where the result is called _view_ or _focus_
-and the container is usually called _source_.
+Please, see <<quick-start, Quick Start>> section in order to understand it better
+seeing some example code.
 
 NOTE: This documentation does not covers all api, so if you miss some function,
 contributions are very welcome. You can see the full link:api/index.html#id[API documentation here].
@@ -33,13 +33,118 @@ dependency vector on your *_project.clj_* file:
 
 [source, clojure]
 ----
-[funcool/lentes "1.0.1"]
+[funcool/lentes "1.1.0"]
 ----
 
 
-== User Guide
+[[quick-start]]
+== Quick Start
 
-=== First steps
+Do not be scared with the package name and its description. It is pretty
+strighforward to use and understand. The lense consists in a couple of functions
+responsibles for transform data structures in both directions.
+
+=== Introduction to lenses
+
+Let's create a couple of functions for getter and setter:
+
+[source, clojure]
+----
+(defn my-getter
+  [state]
+  (:foo state))
+
+(defn my-setter
+  [state f]
+  (update state :foo f))
+----
+
+Now, you can use that functions for access or modify data:
+
+[source, clojure]
+----
+(def data {:foo 1 :bar 2})
+
+(my-getter data)
+;; => 1
+
+(my-setter data inc)
+;; => {:foo 2 :bar 2}
+----
+
+Now, we can generalize that using *lenses abstraction*:
+
+[source, clojure]
+----
+(require '[lentes.core :as l])
+
+(def mylens (l/lens my-getter my-setter))
+
+(l/focus mylens state)
+;; => 1
+
+(l/over mylens inc state)
+;; => {:foo 2 :bar 2}
+----
+
+This all code can be awoided just using a one of the great bunch of helpers that
+comes with lentes library out of the box (explained later):
+
+[source, clojure]
+----
+(def mylens (l/key :foo))
+
+(l/focus mylens state)
+;; => 1
+
+(l/over mylens inc state)
+;; => {:foo 2 :bar 2}
+----
+
+=== Working with atoms
+
+But, the best part is coming where you are using atoms for store your state and want
+to create other (derived atoms) that acts like a limited version of the original
+atom, also called materialized view. That you can do with `l/derive` function:
+
+[source, clojure]
+----
+(def state1 (atom {:foo 1 :bar 1}))
+(def state2 (l/derive state1 (l/key :foo))
+
+(satisfies? IAtom state2)
+;; => true
+
+@state2
+;; => 1
+
+(swap! state2 inc)
+@state2
+;; => 2
+
+@state1
+;; => {:foo 2 :bar 2}
+----
+
+The derived atoms has very useful properties such as they are *lazy* (no code
+executed until is really needed) and *smart* (does not trigger watches if the
+focused data is not affected).
+
+This is specially useful, when you want to create a materialized views of the global
+state and use them together with link:https://github.com/tonsky/rum[rum] facilities
+for react on atom changes, allowing components rerender only when the affected state
+is changed.
+
+
+== Reference
+
+This section tries to explain the basic api of lenses and its composition that later
+can be used for derive atoms from other atoms.
+
+
+=== Builtin lenses
+
+==== Identity
 
 We'll start by using the most basic lens, the identity lens. We can get the value
 a lens is focused on using the `focus` function in `lentes.core` ns:
@@ -64,8 +169,11 @@ us apply a function over the focused value of a lens:
 ;; => 4
 ----
 
-There are some builtin lenses that can be used out of the box such as `fst`, `snd`
-and `nth`. Let see some examples on how them can be used:
+
+==== Sequences
+
+There are some builtin lenses that can be used out of the box with sequences such as
+`fst`, `snd` and `nth`. Let see some examples on how them can be used:
 
 .Example using `fst` lense
 [source, clojure]
@@ -97,31 +205,7 @@ and `nth`. Let see some examples on how them can be used:
 ----
 
 
-=== Lenses composition
-
-One of the big advantatges of the lenses implementation of cats library is that
-them are implemented using plain functions:
-
-[source, clojure]
-----
-(def my-lens (comp l/fst l/fst (l/nth 2)))
-
-(def data
-  [[0 1 2]
-   [3 4 5]])
-
-(l/focus my-lens data)
-;; => 2
-
-(l/put my-lens 42 data)
-;; => [[0 1 42] [3 4 5]]
-----
-
-Lenses compose with regular function composition and, like transducers, the
-combined lens runs from left to right.
-
-
-=== Builtin lenses
+==== Associative data structures
 
 There's `key` and `select-keys` for focusing on one or multiple keys respectively:
 
@@ -194,8 +278,11 @@ and viceversa:
 ;; => 120
 ----
 
-And conditional lenses that can be defined using a predicate function and
-returns a lens that focuses in an element only if it passes the predicate:
+
+==== Conditionals
+
+And conditional lenses that can be defined using a predicate function and returns a
+lens that focuses in an element only if it passes the predicate:
 
 .Example focusing using conditional lenses
 [source, clojure]
@@ -220,41 +307,29 @@ returns a lens that focuses in an element only if it passes the predicate:
 ----
 
 
-=== Interoperability
+=== Composition
 
-There are also `Focus` type that allows you to derive atom like objects from
-clojure atoms focusing to a specific portion of it using lenses.
-
-Let see an example focusing on a concrete set of keys on an asociative
-data structure referenced by an atom:
+One of the big advantatges of this lenses implementation is because it is
+implemented in termps of function composition, much in the same line as
+transducers. Let see a example:
 
 [source, clojure]
 ----
-(def state (atom {:x 1 :y 2 :z 3}))
+(def my-lens (comp l/fst l/fst (l/nth 2)))
 
-(def state-d
-  (l/focus-atom (l/select-keys [:x :y]) state))
+(def data
+  [[0 1 2]
+   [3 4 5]])
 
-@state-d
-;; => {:x 1 :y 2}
+(l/focus my-lens data)
+;; => 2
+
+(l/put my-lens 42 data)
+;; => [[0 1 42] [3 4 5]]
 ----
 
-The object returned by `focus-atom` function behaves identically to a clojure
-atom and it can be treated as drop in replacement of it:
-
-[source, clojure]
-----
-(swap! state-d update :x inc)
-
-@state
-;; => {:x 2 :y 2 :z 3}
-
-@state-d
-;; => {:x 2 :y 2}
-----
-
-And do not forget that you also can attach watchers to focused atoms in the same
-way as you will do that with clojure(script) atoms.
+Lenses compose with regular function composition and, like transducers, the
+combined lens runs from left to right.
 
 
 == Developers Guide
