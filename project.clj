@@ -1,4 +1,4 @@
-(defproject funcool/lentes "1.0.1"
+(defproject funcool/lentes "1.1.0"
   :description "Functional references for Clojure and ClojureScript"
   :url "https://github.com/funcool/lentes"
   :license {:name "Public Domain" :url "http://unlicense.org/"}
@@ -22,5 +22,5 @@
               :src-uri "http://github.com/funcool/lentes/blob/master/"
               :src-uri-prefix "#L"}
 
-    :plugins [[funcool/codeina "0.3.0"]
-              [lein-ancient "0.6.7"]]}})
+    :plugins [[funcool/codeina "0.4.0"]
+              [lein-ancient "0.6.10"]]}})
