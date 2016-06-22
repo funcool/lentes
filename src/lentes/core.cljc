@@ -7,13 +7,20 @@
   "Given a function for getting the focused value from a state (getter)
   and a function that takes the state and and update function (setter),
   constructs a lens."
-  [getter setter]
-  (fn [next]
-    (fn
-      ([s]
+  ([getter]
+   (fn [next]
+     (fn
+       ([s]
         (next (getter s)))
-      ([s f]
-        (setter s #(next % f))))))
+       ([s f]
+        (throw (ex-info "Read only lense!" {}))))))
+  ([getter setter]
+   (fn [next]
+     (fn
+       ([s]
+        (next (getter s)))
+       ([s f]
+        (setter s #(next % f)))))))
 
 ;; base lenses
 
