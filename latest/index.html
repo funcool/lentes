@@ -236,7 +236,7 @@ atom, also called materialized view. That you can do with <code>l/derive</code> 
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">state1</span> <span class="tok-p">(</span><span class="tok-nf">atom</span> <span class="tok-p">{</span><span class="tok-ss">:foo</span> <span class="tok-mi">1</span> <span class="tok-ss">:bar</span> <span class="tok-mi">1</span><span class="tok-p">}))</span>
-<span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">state2</span> <span class="tok-p">(</span><span class="tok-nf">l/derive</span> <span class="tok-nv">state1</span> <span class="tok-p">(</span><span class="tok-nf">l/key</span> <span class="tok-ss">:foo</span><span class="tok-p">))</span>
+<span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">state2</span> <span class="tok-p">(</span><span class="tok-nf">l/derive</span> <span class="tok-p">(</span><span class="tok-nf">l/key</span> <span class="tok-ss">:foo</span><span class="tok-p">)</span> <span class="tok-nv">state1</span><span class="tok-p">))</span>
 
 <span class="tok-p">(</span><span class="tok-nf">satisfies?</span> <span class="tok-nv">IAtom</span> <span class="tok-nv">state2</span><span class="tok-p">)</span>
 <span class="tok-c1">;; =&gt; true</span>
@@ -585,7 +585,7 @@ For more information, please refer to &lt;http://unlicense.org/&gt;</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2016-06-22 16:29:34 EEST
+Last updated 2016-06-22 17:43:10 EEST
 </div>
 </div>
 </body>
