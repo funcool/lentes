@@ -1,5 +1,5 @@
 (ns lentes.core
-  (:refer-clojure :exclude [nth key keys vals filter select-keys cat]))
+  (:refer-clojure :exclude [nth key keys vals filter select-keys cat derive]))
 
 ;; constructors
 
@@ -171,7 +171,7 @@
   (keyword (str id "-" (name key))))
 
 #?(:clj
-   (deftype Focus [id lens source]
+   (deftype RWFocus [id lens source check-equals?]
      clojure.lang.IDeref
      (deref [_] (focus lens @source))
 
@@ -198,14 +198,16 @@
          (add-watch source key (fn [key _ oldval newval]
                                  (let [old' (focus lens oldval)
                                        new' (focus lens newval)]
-                                   (when (not= old' new')
+                                   (when (or (not check-equals?)
+                                             (not= old' new'))
                                      (cb key self old' new')))))))
      (removeWatch [_ key]
        (let [key (prefix-key key id)]
          (remove-watch source key))))
 
    :cljs
-   (deftype Focus [id lens source]
+   (deftype RWFocus [id lens source check-equals?]
+     IAtom
      IDeref
      (-deref [_] (focus lens @source))
 
@@ -234,13 +236,74 @@
          (add-watch source key (fn [key _ oldval newval]
                                  (let [old' (focus lens oldval)
                                        new' (focus lens newval)]
-                                   (when (not= old' new')
+                                   (when (or (not check-equals?)
+                                             (not= old' new'))
                                      (cb key self old' new')))))))
      (-remove-watch [_ key]
        (let [key (prefix-key key id)]
          (remove-watch source key)))))
 
+
+#?(:clj
+   (deftype ROFocus [id lens source check-equals?]
+     clojure.lang.IDeref
+     (deref [_] (focus lens @source))
+
+     clojure.lang.IRef
+     (addWatch [self key cb]
+       (let [key (prefix-key key id)]
+         (add-watch source key (fn [key _ oldval newval]
+                                 (let [old' (focus lens oldval)
+                                       new' (focus lens newval)]
+                                   (when (or (not check-equals?)
+                                             (not= old' new'))
+                                     (cb key self old' new')))))))
+     (removeWatch [_ key]
+       (let [key (prefix-key key id)]
+         (remove-watch source key))))
+
+   :cljs
+   (deftype ROFocus [id lens source check-equals?]
+     IDeref
+     (-deref [_] (focus lens @source))
+
+     IWatchable
+     (-add-watch [self key cb]
+       (let [key (prefix-key key id)]
+         (add-watch source key (fn [key _ oldval newval]
+                                 (let [old' (focus lens oldval)
+                                       new' (focus lens newval)]
+                                   (when (or (not check-equals?)
+                                             (not= old' new'))
+                                     (cb key self old' new')))))))
+     (-remove-watch [_ key]
+       (let [key (prefix-key key id)]
+         (remove-watch source key)))))
+
+(defn derive
+  "Create a derived atom from an other atom using the provided lense.
+
+  The returned atom is lazy so no code is executed until user requires it.
+
+  By default the derivded atom does not trigger updates if the data does not
+  affects to it (determined by lense), but this behavior can be deactivated
+  passing `:check-equals?` to `false` on the third options parameter.
+
+  You can create expliclitly read only refs (not atoms, because the returned
+  object satisifies watchable and ref but not atom interface) passing
+  `:read-only?` as `true` as option on the optional third parameter."
+  ([lens src]
+   (derive lens src nil))
+  ([lens src {:keys [read-only? check-equals?]
+              :or {read-only? false
+                   check-equals? true}}]
+   (let [id (str (gensym "lentes"))]
+     (if read-only?
+       (ROFocus. id lens src check-equals?)
+       (RWFocus. id lens src check-equals?)))))
+
 (defn focus-atom
+  "A deprecated alias for `derive`."
+  {:deprecated true}
   [lens source]
-  (let [id (str (gensym "lentes"))]
-    (Focus. id lens source)))
+  (derive lens source nil))
