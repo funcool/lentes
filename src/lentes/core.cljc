@@ -281,11 +281,11 @@
          (remove-watch source key)))))
 
 (defn derive
-  "Create a derived atom from an other atom using the provided lense.
+  "Create a derived atom from an other atom with the provided lense.
 
-  The returned atom is lazy so no code is executed until user requires it.
+  The returned atom is lazy, so no code is executed until user requires it.
 
-  By default the derivded atom does not trigger updates if the data does not
+  By default the deriveed atom does not trigger updates if the data does not
   affects to it (determined by lense), but this behavior can be deactivated
   passing `:check-equals?` to `false` on the third options parameter.
 

@@ -110,7 +110,7 @@ atom, also called materialized view. That you can do with `l/derive` function:
 [source, clojure]
 ----
 (def state1 (atom {:foo 1 :bar 1}))
-(def state2 (l/derive state1 (l/key :foo))
+(def state2 (l/derive (l/key :foo) state1))
 
 (satisfies? IAtom state2)
 ;; => true
