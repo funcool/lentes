@@ -1,39 +1,42 @@
 (ns lentes.tests
+  (:refer-clojure :exclude [derive])
   #?(:cljs
      (:require [cljs.test :as t]
                [clojure.test.check]
                [clojure.test.check.generators :as gen :include-macros true]
                [clojure.test.check.properties :as prop :include-macros true]
+               [clojure.test.check.clojure-test :refer-macros (defspec)]
                [lentes.core :as l])
      :clj
      (:require [clojure.test :as t]
                [clojure.test.check]
-               [clojure.test.check.clojure-test :refer [defspec]]
+               [clojure.test.check.clojure-test :refer (defspec)]
                [clojure.test.check.generators :as gen]
                [clojure.test.check.properties :as prop]
-               [lentes.core :as l]))
-  #?(:cljs
-     (:require-macros [clojure.test.check.clojure-test :refer (defspec)])))
+               [lentes.core :as l])))
 
 ;; laws
 
-(defn first-lens-law [{:keys [gen lens xgen] :or {xgen gen/any}}]
-  (prop/for-all [s gen
-                 x xgen]
-    (= x
-       (l/focus lens (l/put lens x s)))))
+(defn first-lens-law
+  [{:keys [gen lens xgen] :or {xgen gen/any}}]
+  (prop/for-all
+   [s gen x xgen]
+   (t/is (= x (l/focus lens (l/put lens x s))))))
 
-(defn second-lens-law [{:keys [gen lens]}]
-  (prop/for-all [s gen]
-    (= s
-       (l/put lens (l/focus lens s) s))))
+(defn second-lens-law
+  [{:keys [gen lens]}]
+  (prop/for-all
+   [s gen]
+   (t/is (= s (l/put lens (l/focus lens s) s)))))
 
-(defn third-lens-law [{:keys [gen lens xgen] :or {xgen gen/any}}]
-  (prop/for-all [s gen
-                 a xgen
-                 b xgen]
-    (= (l/put lens a s)
-       (l/put lens a (l/put lens b s)))))
+(defn third-lens-law
+  [{:keys [gen lens xgen] :or {xgen gen/any}}]
+  (prop/for-all
+   [s gen
+    a xgen
+    b xgen]
+   (t/is (= (l/put lens a s)
+            (l/put lens a (l/put lens b s))))))
 
 ;; generators
 
@@ -135,9 +138,7 @@
 
 (defn with-key
   [k]
-  (gen/fmap (fn [v]
-              {k v})
-            gen/any))
+  (gen/fmap (partial hash-map k) gen/any))
 
 (def key-lens
   {:gen (with-key :foo)
@@ -217,10 +218,18 @@
 
 ;; interop
 
-(t/deftest focus-atom
+(t/deftest derive-rw
   (let [source (atom [0 1 2 3 4])
-        fsource (l/focus-atom l/fst source)]
+        fsource (l/derive l/fst source)]
     (t/is (= @fsource 0))
+
+    #?@(:clj  [(t/is (instance? clojure.lang.IAtom fsource))
+               (t/is (instance? clojure.lang.IDeref fsource))
+               (t/is (instance? clojure.lang.IRef fsource))]
+        :cljs [(t/is (satisfies? IDeref fsource))
+               (t/is (satisfies? IReset fsource))
+               (t/is (satisfies? ISwap fsource))
+               (t/is (satisfies? IWatchable fsource))])
 
     (swap! source #(subvec % 1))
     (t/is (= @source [1 2 3 4]))
@@ -230,10 +239,27 @@
     (t/is (= @source [42 2 3 4]))
     (t/is (= @fsource 42))))
 
-(t/deftest focus-atom-watches
+(t/deftest derive-ro
+  (let [source (atom [0 1 2 3 4])
+        fsource (l/derive l/fst source {:read-only? true})]
+    (t/is (= @fsource 0))
+
+    #?@(:clj  [(t/is (not (instance? clojure.lang.IAtom fsource)))
+               (t/is (instance? clojure.lang.IDeref fsource))
+               (t/is (instance? clojure.lang.IRef fsource))]
+        :cljs [(t/is (satisfies? IDeref fsource))
+               (t/is (not (satisfies? IReset fsource)))
+               (t/is (not (satisfies? ISwap fsource)))
+               (t/is (satisfies? IWatchable fsource))])
+
+    (swap! source #(subvec % 1))
+    (t/is (= @source [1 2 3 4]))
+    (t/is (= @fsource 1))))
+
+(t/deftest derive-watches-rw
   (let [source (atom [0 1 2 3 4])
         watched (volatile! nil)
-        fsource (l/focus-atom l/fst source)]
+        fsource (l/derive l/fst source)]
     (add-watch fsource :test (fn [key ref old new]
                                (vreset! watched [ref old new])))
 
@@ -244,6 +270,19 @@
     (swap! fsource inc)
     (t/is (= @watched
              [fsource 1 2]))
+
+    (remove-watch fsource :test)))
+
+(t/deftest derive-watches-ro
+  (let [source (atom [0 1 2 3 4])
+        watched (volatile! nil)
+        fsource (l/derive l/fst source {:read-only? true})]
+    (add-watch fsource :test (fn [key ref old new]
+                               (vreset! watched [ref old new])))
+
+    (swap! source #(subvec % 1))
+    (t/is (= @watched
+             [fsource 0 1]))
 
     (remove-watch fsource :test)))
 
