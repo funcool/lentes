@@ -86,12 +86,16 @@
 <li><a href="#install">Install</a></li>
 </ul>
 </li>
-<li><a href="#user-guide">User Guide</a>
+<li><a href="#quick-start">Quick Start</a>
 <ul class="sectlevel2">
-<li><a href="#first-steps">First steps</a></li>
-<li><a href="#lenses-composition">Lenses composition</a></li>
+<li><a href="#introduction-to-lenses">Introduction to lenses</a></li>
+<li><a href="#working-with-atoms">Working with atoms</a></li>
+</ul>
+</li>
+<li><a href="#reference">Reference</a>
+<ul class="sectlevel2">
 <li><a href="#builtin-lenses">Builtin lenses</a></li>
-<li><a href="#interoperability">Interoperability</a></li>
+<li><a href="#composition">Composition</a></li>
 </ul>
 </li>
 <li><a href="#developers-guide">Developers Guide</a>
@@ -111,13 +115,13 @@
 <h2 id="introduction"><a class="link" href="#introduction">Introduction</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>This is an implementation of functional references modeled as functions (in the
-same way as transducers).</p>
+<p>This is an implementation of functional references modeled as functions (in the same
+way as transducers). Is a generalization of get and put mapping to the particular
+part of a data structure.</p>
 </div>
 <div class="paragraph">
-<p>Functional reference or lense is a generalization of get and put mapping to the
-particular part of a data structure, where the result is called <em>view</em> or <em>focus</em>
-and the container is usually called <em>source</em>.</p>
+<p>Please, see <a href="#quick-start">Quick Start</a> section in order to understand it better
+seeing some example code.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -146,17 +150,133 @@ dependency vector on your <strong><em>project.clj</em></strong> file:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">[</span><span class="tok-nv">funcool/lentes</span> <span class="tok-s">&quot;1.0.1&quot;</span><span class="tok-p">]</span></code></pre>
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">[</span><span class="tok-nv">funcool/lentes</span> <span class="tok-s">&quot;1.1.0&quot;</span><span class="tok-p">]</span></code></pre>
 </div>
 </div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="user-guide"><a class="link" href="#user-guide">User Guide</a></h2>
+<h2 id="quick-start"><a class="link" href="#quick-start">Quick Start</a></h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>Do not be scared with the package name and its description. It is pretty
+strighforward to use and understand. The lense consists in a couple of functions
+responsibles for transform data structures in both directions.</p>
+</div>
 <div class="sect2">
-<h3 id="first-steps"><a class="link" href="#first-steps">First steps</a></h3>
+<h3 id="introduction-to-lenses"><a class="link" href="#introduction-to-lenses">Introduction to lenses</a></h3>
+<div class="paragraph">
+<p>Let&#8217;s create a couple of functions for getter and setter:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-kd">defn </span><span class="tok-nv">my-getter</span>
+  <span class="tok-p">[</span><span class="tok-nv">state</span><span class="tok-p">]</span>
+  <span class="tok-p">(</span><span class="tok-ss">:foo</span> <span class="tok-nv">state</span><span class="tok-p">))</span>
+
+<span class="tok-p">(</span><span class="tok-kd">defn </span><span class="tok-nv">my-setter</span>
+  <span class="tok-p">[</span><span class="tok-nv">state</span> <span class="tok-nv">f</span><span class="tok-p">]</span>
+  <span class="tok-p">(</span><span class="tok-nf">update</span> <span class="tok-nv">state</span> <span class="tok-ss">:foo</span> <span class="tok-nv">f</span><span class="tok-p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now, you can use that functions for access or modify data:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">data</span> <span class="tok-p">{</span><span class="tok-ss">:foo</span> <span class="tok-mi">1</span> <span class="tok-ss">:bar</span> <span class="tok-mi">2</span><span class="tok-p">})</span>
+
+<span class="tok-p">(</span><span class="tok-nf">my-getter</span> <span class="tok-nv">data</span><span class="tok-p">)</span>
+<span class="tok-c1">;; =&gt; 1</span>
+
+<span class="tok-p">(</span><span class="tok-nf">my-setter</span> <span class="tok-nv">data</span> <span class="tok-nv">inc</span><span class="tok-p">)</span>
+<span class="tok-c1">;; =&gt; {:foo 2 :bar 2}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now, we can generalize that using <strong>lenses abstraction</strong>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">require</span> <span class="tok-o">&#39;</span><span class="tok-p">[</span><span class="tok-nv">lentes.core</span> <span class="tok-ss">:as</span> <span class="tok-nv">l</span><span class="tok-p">])</span>
+
+<span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">mylens</span> <span class="tok-p">(</span><span class="tok-nf">l/lens</span> <span class="tok-nv">my-getter</span> <span class="tok-nv">my-setter</span><span class="tok-p">))</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/focus</span> <span class="tok-nv">mylens</span> <span class="tok-nv">state</span><span class="tok-p">)</span>
+<span class="tok-c1">;; =&gt; 1</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/over</span> <span class="tok-nv">mylens</span> <span class="tok-nb">inc </span><span class="tok-nv">state</span><span class="tok-p">)</span>
+<span class="tok-c1">;; =&gt; {:foo 2 :bar 2}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This all code can be awoided just using a one of the great bunch of helpers that
+comes with lentes library out of the box (explained later):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">mylens</span> <span class="tok-p">(</span><span class="tok-nf">l/key</span> <span class="tok-ss">:foo</span><span class="tok-p">))</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/focus</span> <span class="tok-nv">mylens</span> <span class="tok-nv">state</span><span class="tok-p">)</span>
+<span class="tok-c1">;; =&gt; 1</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/over</span> <span class="tok-nv">mylens</span> <span class="tok-nb">inc </span><span class="tok-nv">state</span><span class="tok-p">)</span>
+<span class="tok-c1">;; =&gt; {:foo 2 :bar 2}</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="working-with-atoms"><a class="link" href="#working-with-atoms">Working with atoms</a></h3>
+<div class="paragraph">
+<p>But, the best part is coming where you are using atoms for store your state and want
+to create other (derived atoms) that acts like a limited version of the original
+atom, also called materialized view. That you can do with <code>l/derive</code> function:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">state1</span> <span class="tok-p">(</span><span class="tok-nf">atom</span> <span class="tok-p">{</span><span class="tok-ss">:foo</span> <span class="tok-mi">1</span> <span class="tok-ss">:bar</span> <span class="tok-mi">1</span><span class="tok-p">}))</span>
+<span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">state2</span> <span class="tok-p">(</span><span class="tok-nf">l/derive</span> <span class="tok-nv">state1</span> <span class="tok-p">(</span><span class="tok-nf">l/key</span> <span class="tok-ss">:foo</span><span class="tok-p">))</span>
+
+<span class="tok-p">(</span><span class="tok-nf">satisfies?</span> <span class="tok-nv">IAtom</span> <span class="tok-nv">state2</span><span class="tok-p">)</span>
+<span class="tok-c1">;; =&gt; true</span>
+
+<span class="tok-o">@</span><span class="tok-nv">state2</span>
+<span class="tok-c1">;; =&gt; 1</span>
+
+<span class="tok-p">(</span><span class="tok-nf">swap!</span> <span class="tok-nv">state2</span> <span class="tok-nv">inc</span><span class="tok-p">)</span>
+<span class="tok-o">@</span><span class="tok-nv">state2</span>
+<span class="tok-c1">;; =&gt; 2</span>
+
+<span class="tok-o">@</span><span class="tok-nv">state1</span>
+<span class="tok-c1">;; =&gt; {:foo 2 :bar 2}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The derived atoms has very useful properties such as they are <strong>lazy</strong> (no code
+executed until is really needed) and <strong>smart</strong> (does not trigger watches if the
+focused data is not affected).</p>
+</div>
+<div class="paragraph">
+<p>This is specially useful, when you want to create a materialized views of the global
+state and use them together with <a href="https://github.com/tonsky/rum">rum</a> facilities
+for react on atom changes, allowing components rerender only when the affected state
+is changed.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="reference"><a class="link" href="#reference">Reference</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This section tries to explain the basic api of lenses and its composition that later
+can be used for derive atoms from other atoms.</p>
+</div>
+<div class="sect2">
+<h3 id="builtin-lenses"><a class="link" href="#builtin-lenses">Builtin lenses</a></h3>
+<div class="sect3">
+<h4 id="identity"><a class="link" href="#identity">Identity</a></h4>
 <div class="paragraph">
 <p>We&#8217;ll start by using the most basic lens, the identity lens. We can get the value
 a lens is focused on using the <code>focus</code> function in <code>lentes.core</code> ns:</p>
@@ -182,9 +302,12 @@ us apply a function over the focused value of a lens:</p>
 <span class="tok-c1">;; =&gt; 4</span></code></pre>
 </div>
 </div>
+</div>
+<div class="sect3">
+<h4 id="sequences"><a class="link" href="#sequences">Sequences</a></h4>
 <div class="paragraph">
-<p>There are some builtin lenses that can be used out of the box such as <code>fst</code>, <code>snd</code>
-and <code>nth</code>. Let see some examples on how them can be used:</p>
+<p>There are some builtin lenses that can be used out of the box with sequences such as
+<code>fst</code>, <code>snd</code> and <code>nth</code>. Let see some examples on how them can be used:</p>
 </div>
 <div class="listingblock">
 <div class="title">Example using <code>fst</code> lense</div>
@@ -216,34 +339,8 @@ and <code>nth</code>. Let see some examples on how them can be used:</p>
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="lenses-composition"><a class="link" href="#lenses-composition">Lenses composition</a></h3>
-<div class="paragraph">
-<p>One of the big advantatges of the lenses implementation of cats library is that
-them are implemented using plain functions:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">my-lens</span> <span class="tok-p">(</span><span class="tok-nb">comp </span><span class="tok-nv">l/fst</span> <span class="tok-nv">l/fst</span> <span class="tok-p">(</span><span class="tok-nf">l/nth</span> <span class="tok-mi">2</span><span class="tok-p">)))</span>
-
-<span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">data</span>
-  <span class="tok-p">[[</span><span class="tok-mi">0</span> <span class="tok-mi">1</span> <span class="tok-mi">2</span><span class="tok-p">]</span>
-   <span class="tok-p">[</span><span class="tok-mi">3</span> <span class="tok-mi">4</span> <span class="tok-mi">5</span><span class="tok-p">]])</span>
-
-<span class="tok-p">(</span><span class="tok-nf">l/focus</span> <span class="tok-nv">my-lens</span> <span class="tok-nv">data</span><span class="tok-p">)</span>
-<span class="tok-c1">;; =&gt; 2</span>
-
-<span class="tok-p">(</span><span class="tok-nf">l/put</span> <span class="tok-nv">my-lens</span> <span class="tok-mi">42</span> <span class="tok-nv">data</span><span class="tok-p">)</span>
-<span class="tok-c1">;; =&gt; [[0 1 42] [3 4 5]]</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Lenses compose with regular function composition and, like transducers, the
-combined lens runs from left to right.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="builtin-lenses"><a class="link" href="#builtin-lenses">Builtin lenses</a></h3>
+<div class="sect3">
+<h4 id="associative-data-structures"><a class="link" href="#associative-data-structures">Associative data structures</a></h4>
 <div class="paragraph">
 <p>There&#8217;s <code>key</code> and <code>select-keys</code> for focusing on one or multiple keys respectively:</p>
 </div>
@@ -318,9 +415,12 @@ and viceversa:</p>
 <span class="tok-c1">;; =&gt; 120</span></code></pre>
 </div>
 </div>
+</div>
+<div class="sect3">
+<h4 id="conditionals"><a class="link" href="#conditionals">Conditionals</a></h4>
 <div class="paragraph">
-<p>And conditional lenses that can be defined using a predicate function and
-returns a lens that focuses in an element only if it passes the predicate:</p>
+<p>And conditional lenses that can be defined using a predicate function and returns a
+lens that focuses in an element only if it passes the predicate:</p>
 </div>
 <div class="listingblock">
 <div class="title">Example focusing using conditional lenses</div>
@@ -345,45 +445,32 @@ returns a lens that focuses in an element only if it passes the predicate:</p>
 </div>
 </div>
 </div>
+</div>
 <div class="sect2">
-<h3 id="interoperability"><a class="link" href="#interoperability">Interoperability</a></h3>
+<h3 id="composition"><a class="link" href="#composition">Composition</a></h3>
 <div class="paragraph">
-<p>There are also <code>Focus</code> type that allows you to derive atom like objects from
-clojure atoms focusing to a specific portion of it using lenses.</p>
-</div>
-<div class="paragraph">
-<p>Let see an example focusing on a concrete set of keys on an asociative
-data structure referenced by an atom:</p>
+<p>One of the big advantatges of this lenses implementation is because it is
+implemented in termps of function composition, much in the same line as
+transducers. Let see a example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">state</span> <span class="tok-p">(</span><span class="tok-nf">atom</span> <span class="tok-p">{</span><span class="tok-ss">:x</span> <span class="tok-mi">1</span> <span class="tok-ss">:y</span> <span class="tok-mi">2</span> <span class="tok-ss">:z</span> <span class="tok-mi">3</span><span class="tok-p">}))</span>
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">my-lens</span> <span class="tok-p">(</span><span class="tok-nb">comp </span><span class="tok-nv">l/fst</span> <span class="tok-nv">l/fst</span> <span class="tok-p">(</span><span class="tok-nf">l/nth</span> <span class="tok-mi">2</span><span class="tok-p">)))</span>
 
-<span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">state-d</span>
-  <span class="tok-p">(</span><span class="tok-nf">l/focus-atom</span> <span class="tok-p">(</span><span class="tok-nf">l/select-keys</span> <span class="tok-p">[</span><span class="tok-ss">:x</span> <span class="tok-ss">:y</span><span class="tok-p">])</span> <span class="tok-nv">state</span><span class="tok-p">))</span>
+<span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">data</span>
+  <span class="tok-p">[[</span><span class="tok-mi">0</span> <span class="tok-mi">1</span> <span class="tok-mi">2</span><span class="tok-p">]</span>
+   <span class="tok-p">[</span><span class="tok-mi">3</span> <span class="tok-mi">4</span> <span class="tok-mi">5</span><span class="tok-p">]])</span>
 
-<span class="tok-o">@</span><span class="tok-nv">state-d</span>
-<span class="tok-c1">;; =&gt; {:x 1 :y 2}</span></code></pre>
+<span class="tok-p">(</span><span class="tok-nf">l/focus</span> <span class="tok-nv">my-lens</span> <span class="tok-nv">data</span><span class="tok-p">)</span>
+<span class="tok-c1">;; =&gt; 2</span>
+
+<span class="tok-p">(</span><span class="tok-nf">l/put</span> <span class="tok-nv">my-lens</span> <span class="tok-mi">42</span> <span class="tok-nv">data</span><span class="tok-p">)</span>
+<span class="tok-c1">;; =&gt; [[0 1 42] [3 4 5]]</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The object returned by <code>focus-atom</code> function behaves identically to a clojure
-atom and it can be treated as drop in replacement of it:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">swap!</span> <span class="tok-nv">state-d</span> <span class="tok-nv">update</span> <span class="tok-ss">:x</span> <span class="tok-nv">inc</span><span class="tok-p">)</span>
-
-<span class="tok-o">@</span><span class="tok-nv">state</span>
-<span class="tok-c1">;; =&gt; {:x 2 :y 2 :z 3}</span>
-
-<span class="tok-o">@</span><span class="tok-nv">state-d</span>
-<span class="tok-c1">;; =&gt; {:x 2 :y 2}</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>And do not forget that you also can attach watchers to focused atoms in the same
-way as you will do that with clojure(script) atoms.</p>
+<p>Lenses compose with regular function composition and, like transducers, the
+combined lens runs from left to right.</p>
 </div>
 </div>
 </div>
@@ -498,7 +585,7 @@ For more information, please refer to &lt;http://unlicense.org/&gt;</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2016-06-17 08:28:20 EEST
+Last updated 2016-06-22 16:29:34 EEST
 </div>
 </div>
 </body>
