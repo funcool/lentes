@@ -4,7 +4,7 @@ lein: lein
 
 script:
   - ./scripts/build
-  - nvm install v5.10.1
+  - nvm install v6.2.2
   - node --version
   - node out/tests.js
 
