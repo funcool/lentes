@@ -142,15 +142,6 @@
                 f
                 (clojure.core/select-keys ks))))))
 
-(defn getter
-  "A simple readonly lense that runs arbitrary
-  code on focus.
-  DEPRECATED: use `lens` function that now has the
-  setter as optional parameter."
-  {:deprecated true}
-  [f]
-  (lens f))
-
 (defn in
   "Given a path and optionally a default value, return a lens that
   focuses the given path in an associative data structure."
