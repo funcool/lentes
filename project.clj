@@ -1,8 +1,8 @@
-(defproject funcool/lentes "1.1.0"
+(defproject funcool/lentes "1.2.0"
   :description "Functional references for Clojure and ClojureScript"
   :url "https://github.com/funcool/lentes"
-  :license {:name "Public Domain" :url "http://unlicense.org/"}
-
+  :license {:name "BSD (2-Clause)"
+            :url "http://opensource.org/licenses/BSD-2-Clause"}
   :dependencies [[org.clojure/clojure "1.8.0" :scope "provided"]
                  [org.clojure/clojurescript "1.9.89" :scope "provided"]
                  [org.clojure/test.check "0.9.0" :scope "test"]]
