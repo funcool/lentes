@@ -161,32 +161,47 @@
   [key id]
   (keyword (str id "-" (name key))))
 
+(def ^:private +empty+
+  #?(:clj (Object.) :cljs (js/Object.)))
+
 #?(:clj
-   (deftype RWFocus [id lens source check-equals?]
+   (deftype RWFocus [id lens src srccache cache check-equals?]
      clojure.lang.IDeref
-     (deref [_] (focus lens @source))
+     (deref [it]
+       (letfn [(generate []
+                 (let [source (deref src)
+                       result (focus lens source)]
+                   (vreset! srccache source)
+                   (vreset! cache result)
+                   result))]
+         (locking it
+           (if (identical? @cache +empty+)
+             (generate)
+             (if (identical? @srccache @src)
+               @cache
+               (generate))))))
 
      clojure.lang.IAtom
      (reset [self newval]
-       (swap! source #(put lens newval %))
+       (swap! src #(put lens newval %))
        (deref self))
      (swap [self f]
-       (swap! source (fn [s] (over lens f s)))
+       (swap! src (fn [s] (over lens f s)))
        (deref self))
      (swap [self f x]
-       (swap! source (fn [s] (over lens #(f % x) s)))
+       (swap! src (fn [s] (over lens #(f % x) s)))
        (deref self))
      (swap [self f x y]
-       (swap! source (fn [s] (over lens #(f % x y) s)))
+       (swap! src (fn [s] (over lens #(f % x y) s)))
        (deref self))
      (swap [self f x y more]
-       (swap! source (fn [s] (over lens #(apply f % x y more) s)))
+       (swap! src (fn [s] (over lens #(apply f % x y more) s)))
        (deref self))
 
      clojure.lang.IRef
      (addWatch [self key cb]
        (let [key (prefix-key key id)]
-         (add-watch source key (fn [key _ oldval newval]
+         (add-watch src key (fn [key _ oldval newval]
                                  (let [old' (focus lens oldval)
                                        new' (focus lens newval)]
                                    (when (or (not check-equals?)
@@ -194,37 +209,48 @@
                                      (cb key self old' new')))))))
      (removeWatch [_ key]
        (let [key (prefix-key key id)]
-         (remove-watch source key))))
+         (remove-watch src key))))
 
    :cljs
-   (deftype RWFocus [id lens source check-equals?]
+   (deftype RWFocus [id lens src srccache cache check-equals?]
      IAtom
      IDeref
-     (-deref [_] (focus lens @source))
+     (-deref [_]
+       (letfn [(generate []
+                 (let [source (deref src)
+                       result (focus lens source)]
+                   (vreset! srccache source)
+                   (vreset! cache result)
+                   result))]
+         (if (identical? @cache +empty+)
+           (generate)
+           (if (identical? @srccache @src)
+             @cache
+             (generate)))))
 
      IReset
      (-reset! [self newval]
-       (swap! source #(put lens newval %))
+       (swap! src #(put lens newval %))
        (deref self))
 
      ISwap
      (-swap! [self f]
-       (swap! source (fn [s] (over lens f s)))
+       (swap! src (fn [s] (over lens f s)))
        (deref self))
      (-swap! [self f x]
-       (swap! source (fn [s] (over lens #(f % x) s)))
+       (swap! src (fn [s] (over lens #(f % x) s)))
        (deref self))
      (-swap! [self f x y]
-       (swap! source (fn [s] (over lens #(f % x y) s)))
+       (swap! src (fn [s] (over lens #(f % x y) s)))
        (deref self))
      (-swap! [self f x y more]
-       (swap! source (fn [s] (over lens #(apply f % x y more) s)))
+       (swap! src (fn [s] (over lens #(apply f % x y more) s)))
        (deref self))
 
      IWatchable
      (-add-watch [self key cb]
        (let [key (prefix-key key id)]
-         (add-watch source key (fn [key _ oldval newval]
+         (add-watch src key (fn [key _ oldval newval]
                                  (let [old' (focus lens oldval)
                                        new' (focus lens newval)]
                                    (when (or (not check-equals?)
@@ -232,18 +258,32 @@
                                      (cb key self old' new')))))))
      (-remove-watch [_ key]
        (let [key (prefix-key key id)]
-         (remove-watch source key)))))
+         (remove-watch src key)))))
 
+(def ^:private not-identical? (complement identical?))
+(def ^:private empty-cache? #(identical? @% +empty+))
 
 #?(:clj
-   (deftype ROFocus [id lens source check-equals?]
+   (deftype ROFocus [id lens src srccache cache check-equals?]
      clojure.lang.IDeref
-     (deref [_] (focus lens @source))
+     (deref [_]
+       (letfn [(generate []
+                 (let [source (deref src)
+                       result (focus lens source)]
+                   (vreset! srccache source)
+                   (vreset! cache result)
+                   result))]
+         (locking it
+           (if (identical? @cache +empty+)
+             (generate)
+             (if (identical? @srccache @src)
+               @cache
+               (generate))))))
 
      clojure.lang.IRef
      (addWatch [self key cb]
        (let [key (prefix-key key id)]
-         (add-watch source key (fn [key _ oldval newval]
+         (add-watch src key (fn [key _ oldval newval]
                                  (let [old' (focus lens oldval)
                                        new' (focus lens newval)]
                                    (when (or (not check-equals?)
@@ -251,17 +291,28 @@
                                      (cb key self old' new')))))))
      (removeWatch [_ key]
        (let [key (prefix-key key id)]
-         (remove-watch source key))))
+         (remove-watch src key))))
 
    :cljs
-   (deftype ROFocus [id lens source check-equals?]
+   (deftype ROFocus [id lens src srccache cache check-equals?]
      IDeref
-     (-deref [_] (focus lens @source))
+     (-deref [_]
+       (letfn [(generate []
+                 (let [source (deref src)
+                       result (focus lens source)]
+                   (vreset! srccache source)
+                   (vreset! cache result)
+                   result))]
+         (if (identical? @cache +empty+)
+           (generate)
+           (if (identical? @srccache @src)
+             @cache
+             (generate)))))
 
      IWatchable
      (-add-watch [self key cb]
        (let [key (prefix-key key id)]
-         (add-watch source key (fn [key _ oldval newval]
+         (add-watch src key (fn [key _ oldval newval]
                                  (let [old' (focus lens oldval)
                                        new' (focus lens newval)]
                                    (when (or (not check-equals?)
@@ -269,7 +320,7 @@
                                      (cb key self old' new')))))))
      (-remove-watch [_ key]
        (let [key (prefix-key key id)]
-         (remove-watch source key)))))
+         (remove-watch src key)))))
 
 (defn derive
   "Create a derived atom from an other atom with the provided lense.
@@ -288,13 +339,9 @@
   ([lens src {:keys [read-only? check-equals?]
               :or {read-only? false
                    check-equals? true}}]
-   (let [id (str (gensym "lentes"))]
+   (let [id (str (gensym "lentes"))
+         cache (volatile! +empty+)
+         srccache (volatile! @src)]
      (if read-only?
-       (ROFocus. id lens src check-equals?)
-       (RWFocus. id lens src check-equals?)))))
-
-(defn focus-atom
-  "A deprecated alias for `derive`."
-  {:deprecated true}
-  [lens source]
-  (derive lens source nil))
+       (ROFocus. id lens src srccache cache check-equals?)
+       (RWFocus. id lens src srccache cache check-equals?)))))
