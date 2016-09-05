@@ -129,18 +129,22 @@
    (fn [s f]
      (update s k f))))
 
+(def ^:private core-select-keys
+  #?(:clj clojure.core/select-keys
+     :cljs cljs.core/select-keys))
+
 (defn select-keys
   "Return a lens focused on the given keys in an associative data
   structure."
   [ks]
   (lens
    (fn [s]
-     (clojure.core/select-keys s ks))
+     (core-select-keys s ks))
    (fn [s f]
      (merge (apply dissoc s ks)
-            (-> (clojure.core/select-keys s ks)
+            (-> (core-select-keys s ks)
                 f
-                (clojure.core/select-keys ks))))))
+                (core-select-keys ks))))))
 
 (defn in
   "Given a path and optionally a default value, return a lens that
@@ -165,21 +169,22 @@
   #?(:clj (Object.) :cljs (js/Object.)))
 
 #?(:clj
-   (deftype RWFocus [id lens src srccache cache check-equals?]
+   (deftype RWFocus [id lens src check-equals?
+                     ^:volatile-mutable watchers
+                     ^:volatile-mutable srccache
+                     ^:volatile-mutable oldcache
+                     ^:volatile-mutable cache]
      clojure.lang.IDeref
-     (deref [it]
-       (letfn [(generate []
-                 (let [source (deref src)
-                       result (focus lens source)]
-                   (vreset! srccache source)
-                   (vreset! cache result)
-                   result))]
-         (locking it
-           (if (identical? @cache +empty+)
-             (generate)
-             (if (identical? @srccache @src)
-               @cache
-               (generate))))))
+     (deref [self]
+       (locking self
+         (if (identical? srccache @src)
+           cache
+           (let [source (deref src)
+                 result (focus lens source)]
+             (println "deref: cache miss")
+             (set! (.-srccache self) source)
+             (set! (.-cache self) result)
+             result))))
 
      clojure.lang.IAtom
      (reset [self newval]
@@ -200,16 +205,36 @@
 
      clojure.lang.IRef
      (addWatch [self key cb]
-       (let [key (prefix-key key id)]
-         (add-watch src key (fn [key _ oldval newval]
-                                 (let [old' (focus lens oldval)
-                                       new' (focus lens newval)]
-                                   (when (or (not check-equals?)
-                                             (not= old' new'))
-                                     (cb key self old' new')))))))
-     (removeWatch [_ key]
-       (let [key (prefix-key key id)]
-         (remove-watch src key))))
+       (letfn [(run-watchers [oldv newv]
+                 (doseq [[key wf] (.-watchers self)]
+                   (wf key self oldv newv)))
+               (main-watcher [_ _ oldv newv]
+                 (locking self
+                   (if (identical? newv (.-srccache self))
+                     (do (println "watcher: cache hit")
+                         (if-not check-equals?
+                           (run-watchers (.-oldcache self)
+                                         (.-cache self))))
+
+                     (let [old' (focus lens oldv)
+                           new' (focus lens newv)]
+                       (println "watcher: cache miss")
+                       (set! (.-cache self) new')
+                       (set! (.-oldcache self) old')
+                       (set! (.-srccache self) newv)
+                       (if (or (not check-equals?)
+                               (not= old' new'))
+                         (run-watchers old' new'))))))]
+
+         (set! (.-watchers self) (assoc watchers key cb))
+         (when (= (count (.-watchers self)) 1)
+           (add-watch src id main-watcher))
+         self))
+
+     (removeWatch [self key]
+       (set! (.-watchers self) (dissoc watchers key))
+       (when (empty? watchers)
+         (remove-watch src id))))
 
    :cljs
    (deftype RWFocus [id lens src srccache cache check-equals?]
@@ -266,7 +291,7 @@
 #?(:clj
    (deftype ROFocus [id lens src srccache cache check-equals?]
      clojure.lang.IDeref
-     (deref [_]
+     (deref [it]
        (letfn [(generate []
                  (let [source (deref src)
                        result (focus lens source)]
@@ -340,8 +365,11 @@
               :or {read-only? false
                    check-equals? true}}]
    (let [id (str (gensym "lentes"))
+         source (deref src)
          cache (volatile! +empty+)
-         srccache (volatile! @src)]
+         srccache (volatile! +empty+)
+         oldcache (volatile! +empty+)
+         oldsrccache (volatile! source)]
      (if read-only?
        (ROFocus. id lens src srccache cache check-equals?)
-       (RWFocus. id lens src srccache cache check-equals?)))))
+       (RWFocus. id lens src check-equals? nil +empty+ +empty+ +empty+)))))
