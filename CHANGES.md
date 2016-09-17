@@ -1,11 +1,14 @@
 # Changelog #
 
-## Version 1.2.0 ##
+## Version 1.2.0-SNAPSHOT ##
 
 Date: unreleased
 
 - Change license to BSD 2-Clause
 - Remove the deprecated `getter` function.
+- Improve derived atom perfromance.
+  Adding cache and proxying the watchers in order to reduce
+  N watchers to derived atom to 1 watcher to the source atom.
 
 
 ## Version 1.1.0 ##
