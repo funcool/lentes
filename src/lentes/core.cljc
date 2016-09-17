@@ -294,7 +294,7 @@
            (add-watch src id main-watcher))
          self))
 
-     (-remove-watch [_ key]
+     (-remove-watch [self key]
        (set! (.-watchers self) (dissoc watchers key))
        (when (empty? watchers)
          (remove-watch src id)))))
