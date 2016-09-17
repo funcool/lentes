@@ -6,6 +6,7 @@ Date: unreleased
 
 - Change license to BSD 2-Clause
 - Remove the deprecated `getter` function.
+- Fix `select-keys` lense in cljs impl.
 - Improve derived atom perfromance.
   Adding cache and proxying the watchers in order to reduce
   N watchers to derived atom to 1 watcher to the source atom.
