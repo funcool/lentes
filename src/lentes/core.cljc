@@ -367,13 +367,27 @@
 
      IWatchable
      (-add-watch [self key cb]
-       (let [key (prefix-key key id)]
-         (add-watch src key (fn [key _ oldval newval]
-                                 (let [old' (focus lens oldval)
-                                       new' (focus lens newval)]
-                                   (when (or (not check-equals?)
-                                             (not= old' new'))
-                                     (cb key self old' new')))))))
+       (letfn [(run-watchers [oldv newv]
+                 (doseq [[key wf] (.-watchers self)]
+                   (wf key self oldv newv)))
+               (main-watcher [_ _ oldv newv]
+                 (if (identical? newv (.-srccache self))
+                   (if-not check-equals?
+                     (run-watchers (.-oldcache self)
+                                   (.-cache self)))
+                   (let [old' (focus lens oldv)
+                         new' (focus lens newv)]
+                     (set! (.-cache self) new')
+                     (set! (.-oldcache self) old')
+                     (set! (.-srccache self) newv)
+                     (if (or (not check-equals?)
+                             (not= old' new'))
+                       (run-watchers old' new')))))]
+         (set! (.-watchers self) (assoc watchers key cb))
+         (when (= (count (.-watchers self)) 1)
+           (add-watch src id main-watcher))
+         self))
+
      (-remove-watch [self key]
        (set! (.-watchers self) (dissoc watchers key))
        (when (empty? watchers)
