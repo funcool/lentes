@@ -129,18 +129,22 @@
    (fn [s f]
      (update s k f))))
 
+(def ^:private core-select-keys
+  #?(:clj clojure.core/select-keys
+     :cljs cljs.core/select-keys))
+
 (defn select-keys
   "Return a lens focused on the given keys in an associative data
   structure."
   [ks]
   (lens
    (fn [s]
-     (clojure.core/select-keys s ks))
+     (core-select-keys s ks))
    (fn [s f]
      (merge (apply dissoc s ks)
-            (-> (clojure.core/select-keys s ks)
+            (-> (core-select-keys s ks)
                 f
-                (clojure.core/select-keys ks))))))
+                (core-select-keys ks))))))
 
 (defn in
   "Given a path and optionally a default value, return a lens that
