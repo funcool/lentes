@@ -170,10 +170,10 @@
 
 #?(:clj
    (deftype RWFocus [id lens src check-equals?
-                     ^:volatile-mutable watchers
-                     ^:volatile-mutable srccache
-                     ^:volatile-mutable oldcache
-                     ^:volatile-mutable cache]
+                     ^:unsynchronized-mutable watchers
+                     ^:unsynchronized-mutable srccache
+                     ^:unsynchronized-mutable oldcache
+                     ^:unsynchronized-mutable cache]
      clojure.lang.IDeref
      (deref [self]
        (locking self
@@ -301,10 +301,10 @@
 
 #?(:clj
    (deftype ROFocus [id lens src check-equals?
-                     ^:volatile-mutable watchers
-                     ^:volatile-mutable srccache
-                     ^:volatile-mutable oldcache
-                     ^:volatile-mutable cache]
+                     ^:unsynchronized-mutable watchers
+                     ^:unsynchronized-mutable srccache
+                     ^:unsynchronized-mutable oldcache
+                     ^:unsynchronized-mutable cache]
      clojure.lang.IDeref
      (deref [self]
        (locking self
