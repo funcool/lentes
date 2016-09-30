@@ -1,8 +1,8 @@
 # Changelog #
 
-## Version 1.2.0-SNAPSHOT ##
+## Version 1.2.0 ##
 
-Date: unreleased
+Date: 2016-09-30
 
 - Change license to BSD 2-Clause
 - Remove the deprecated `getter` function.
