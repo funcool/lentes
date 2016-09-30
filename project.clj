@@ -1,4 +1,4 @@
-(defproject funcool/lentes "1.2.0-SNAPSHOT"
+(defproject funcool/lentes "1.2.0"
   :description "Functional references for Clojure and ClojureScript"
   :url "https://github.com/funcool/lentes"
   :license {:name "BSD (2-Clause)"
