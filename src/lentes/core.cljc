@@ -410,7 +410,7 @@
   ([lens src {:keys [read-only? check-equals?]
               :or {read-only? false
                    check-equals? true}}]
-   (let [id (keyword (gensym "lentes-derived-atom"))]
+   (let [id (gensym "lentes-derived-atom")]
      (if read-only?
        (ROFocus. id lens src check-equals? nil +empty+ +empty+ +empty+)
        (RWFocus. id lens src check-equals? nil +empty+ +empty+ +empty+)))))
