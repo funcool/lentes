@@ -202,6 +202,19 @@ There are some builtin lenses that can be used out of the box with sequences suc
 
 (l/put (l/nth 2) 42 [1 2 3])
 ;; => [1 2 42]
+
+(l/put l/each 2 [1 2 3])
+;; => [2 2 2]
+
+(l/focus (comp (l/key :a) l/each) {:a [1 2 3]})
+;; => {:a [1 2 3]}
+
+(l/over (comp (l/key :a) l/each) inc {:a [1 2 3]})
+;; => {:a [2 3 4]}
+
+(l/put (comp (l/key :a) l/each) 2 {:a [1 2 3]})
+;; => {:a [2 2 2]}
+
 ----
 
 

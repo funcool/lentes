@@ -1,5 +1,5 @@
 (ns lentes.core
-  (:refer-clojure :exclude [nth key keys vals filter select-keys cat derive]))
+  (:refer-clojure :exclude [nth key keys vals filter select-keys cat derive each]))
 
 ;; constructors
 
@@ -118,6 +118,13 @@
      (into (sequential-empty s)
            (cons (first s)
                  (f (rest s)))))))
+
+(def each
+  "A lens for each item in a seq"
+  (lens
+    id
+    (fn [s f] (into (sequential-empty s) 
+                    (map f s)))))
 
 (defn key
   "Given a key, returns a lens that focuses on the given key of

@@ -101,6 +101,20 @@
   (third-lens-law {:gen vector-gen
                     :lens (l/nth 0)}))
 
+;; each
+
+(defspec each-first-lens-law 10
+  (first-lens-law {:gen vector-gen
+                   :lens l/each}))
+
+(defspec each-second-lens-law 10
+  (second-lens-law {:gen vector-gen
+                    :lens l/each}))
+
+(defspec each-third-lens-law 10
+  (third-lens-law {:gen vector-gen
+                    :lens l/each}))
+
 ;;; nth composition
 
 (def ffst (comp l/fst l/fst))
