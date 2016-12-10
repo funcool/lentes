@@ -103,15 +103,15 @@
 
 ;; each
 
-(defspec nth-first-lens-law 10
+(defspec each-first-lens-law 10
   (first-lens-law {:gen vector-gen
                    :lens l/each}))
 
-(defspec nth-second-lens-law 10
+(defspec each-second-lens-law 10
   (second-lens-law {:gen vector-gen
                     :lens l/each}))
 
-(defspec nth-third-lens-law 10
+(defspec each-third-lens-law 10
   (third-lens-law {:gen vector-gen
                     :lens l/each}))
 
