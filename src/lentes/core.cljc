@@ -124,7 +124,7 @@
   (lens
     id
     (fn [s f] (into (sequential-empty s) 
-                    (map f s))))
+                    (map f s)))))
 
 (defn key
   "Given a key, returns a lens that focuses on the given key of
