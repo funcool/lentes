@@ -119,6 +119,12 @@
            (cons (first s)
                  (f (rest s)))))))
 
+(def each
+  "A lens for each item in a seq"
+  (lens
+    id
+    #(map %2 %1)))
+
 (defn key
   "Given a key, returns a lens that focuses on the given key of
   an associative data structure."
