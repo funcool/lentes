@@ -41,8 +41,8 @@ dependency vector on your *_project.clj_* file:
 == Quick Start
 
 Do not be scared with the package name and its description. It is pretty
-strighforward to use and understand. The lense consists in a couple of functions
-responsibles for transform data structures in both directions.
+straightforward to use and understand. The lens consists in a couple of functions
+responsible for transform data structures in both directions.
 
 === Introduction to lenses
 
@@ -87,7 +87,7 @@ Now, we can generalize that using *lenses abstraction*:
 ;; => {:foo 2 :bar 2}
 ----
 
-This all code can be awoided just using a one of the great bunch of helpers that
+This all code can be avoided just using a one of the great bunch of helpers that
 comes with lentes library out of the box (explained later):
 
 [source, clojure]
@@ -132,7 +132,7 @@ focused data is not affected).
 
 This is specially useful, when you want to create a materialized views of the global
 state and use them together with link:https://github.com/tonsky/rum[rum] facilities
-for react on atom changes, allowing components rerender only when the affected state
+for react on atom changes, allowing components re-render only when the affected state
 is changed.
 
 
@@ -175,7 +175,7 @@ us apply a function over the focused value of a lens:
 There are some builtin lenses that can be used out of the box with sequences such as
 `fst`, `snd` and `nth`. Let see some examples on how them can be used:
 
-.Example using `fst` lense
+.Example using `fst` lens
 [source, clojure]
 ----
 ;; Focus over the first element of a vector
@@ -191,7 +191,7 @@ There are some builtin lenses that can be used out of the box with sequences suc
 ;; => [42 2 3]
 ----
 
-.Example using the `nth` lense
+.Example using the `nth` lens
 [source, clojure]
 ----
 (l/focus (l/nth 2) [1 2 3])
@@ -238,7 +238,7 @@ There's `key` and `select-keys` for focusing on one or multiple keys respectivel
 
 `in` for focusing on a path:
 
-.Example focusing in neest data structures
+.Example focusing in nested data structures
 [source, clojure]
 ----
 (l/focus (l/in [:a :b])
@@ -259,7 +259,7 @@ Let's take a look at a combinator that will let us build a unit-conversion lens
 called `units`. We have to supply a function to convert from unit `a` to unit `b`
 and viceversa:
 
-.Example definiting a "unit conversion" lense
+.Example defining a "unit conversion" lens
 [source, clojure]
 ----
 (defn sec->min [sec] (/ sec 60))
@@ -309,8 +309,8 @@ lens that focuses in an element only if it passes the predicate:
 
 === Composition
 
-One of the big advantatges of this lenses implementation is because it is
-implemented in termps of function composition, much in the same line as
+One of the big advantages of this lenses implementation is because it is
+implemented in terms of function composition, much in the same line as
 transducers. Let see a example:
 
 [source, clojure]
@@ -376,7 +376,7 @@ For running tests just execute this:
 node ./out/tests.js
 ----
 
-.Run tests on jvm platform
+.Run tests on JVM platform
 ----
 lein test
 ----
