@@ -10,15 +10,15 @@
 
 == Introduction
 
-This is an implementation of functional references modeled as functions (in the same
-way as transducers). Is a generalization of get and put mapping to the particular
-part of a data structure.
+Lentes is an implementation of functional references modeled as functions
+(in the same way as transducers). Lenses are a generalization of get and put
+mapping to a particular part of a data structure.
 
-Please, see <<quick-start, Quick Start>> section in order to understand it better
-seeing some example code.
+Please see the <<examples, Quick Start>> for an overview of what lentes has to
+offer.
 
-NOTE: This documentation does not covers all api, so if you miss some function,
-contributions are very welcome. You can see the full link:api/index.html#id[API documentation here].
+NOTE: This documentation does not cover all of the API. You can browse the full
+link:api/index.html#id[API documentation here].
 
 
 === Project Maturity
@@ -41,12 +41,12 @@ dependency vector on your *_project.clj_* file:
 == Quick Start
 
 Do not be scared with the package name and its description. It is pretty
-straightforward to use and understand. The lens consists in a couple of functions
-responsible for transform data structures in both directions.
+straightforward to use and understand. A lens consists out of couple of
+functions responsible for reading and altering nested data structures.
 
 === Introduction to lenses
 
-Let's create a couple of functions for getter and setter:
+Let's create a getter and setter function:
 
 [source, clojure]
 ----
@@ -59,7 +59,7 @@ Let's create a couple of functions for getter and setter:
   (update state :foo f))
 ----
 
-Now, you can use that functions for access or modify data:
+These can be used to access or modify data:
 
 [source, clojure]
 ----
@@ -72,7 +72,7 @@ Now, you can use that functions for access or modify data:
 ;; => {:foo 2 :bar 2}
 ----
 
-Now, we can generalize that using *lenses abstraction*:
+We can generalize the getting and setting using *lenses abstraction*:
 
 [source, clojure]
 ----
@@ -87,8 +87,9 @@ Now, we can generalize that using *lenses abstraction*:
 ;; => {:foo 2 :bar 2}
 ----
 
-This all code can be avoided just using a one of the great bunch of helpers that
-comes with lentes library out of the box (explained later):
+Lentes comes with some helpers for creating commonly used lenses. As a result
+we don't have to write our own `my-getter` and `my-setter` functions for common
+use-cases. Keep reading to find out what helpers are provided with lentes.
 
 [source, clojure]
 ----
@@ -103,9 +104,9 @@ comes with lentes library out of the box (explained later):
 
 === Working with atoms
 
-But, the best part is coming where you are using atoms for store your state and want
-to create other (derived atoms) that acts like a limited version of the original
-atom, also called materialized view. That you can do with `l/derive` function:
+Lentes succinctly interfaces with atoms. The `l/derive` function allows you to
+create derived atoms that act like limited versions of the original atom. This
+technique is also named `materialized views`.
 
 [source, clojure]
 ----
@@ -130,24 +131,34 @@ The derived atoms has very useful properties such as they are *lazy* (no code
 executed until is really needed) and *smart* (does not trigger watches if the
 focused data is not affected).
 
-This is specially useful, when you want to create a materialized views of the global
-state and use them together with link:https://github.com/tonsky/rum[rum] facilities
-for react on atom changes, allowing components re-render only when the affected state
-is changed.
+This is especially useful, when you want to create materialized views of the
+global state, and use them together with
+link:https://github.com/tonsky/rum[rum] facilities to react on atom changes,
+allowing components to re-render only when the affected state is changed.
 
 
 == Reference
 
-This section tries to explain the basic api of lenses and its composition that later
-can be used for derive atoms from other atoms.
+Lentes offers functions to easily define composable lenses
+
+Just as important are a handful of functions that take a lens and data. When
+called they return either the value or modified data.
+
+The examples below cover basic usage of lentes' lenses.
+It also demonstrates what the `focus`, `put` and `over` functions do.
 
 
 === Builtin lenses
 
 ==== Identity
 
-We'll start by using the most basic lens, the identity lens. We can get the value
-a lens is focused on using the `focus` function in `lentes.core` ns:
+The most basic lens is the `identity` lens. It allows you to get and set the data
+as is.
+
+The `focus` function allows you to get the value the lens is "focused" on.
+
+In this example we create an identity lens. We then call the focus function
+with the lens and a vector as arguments. It doesn't get any simpler then this.
 
 [source, clojure]
 ----
@@ -157,8 +168,13 @@ a lens is focused on using the `focus` function in `lentes.core` ns:
 ;; => [0 1 2 3]
 ----
 
-We have two other primitives available: the `put` operation and `over`, which lets
-us apply a function over the focused value of a lens:
+As you can see `focus` just returned the data as is.
+
+We have two other core functions:
+
+- `put` allows us to set a value a lens is focusing on.
+
+- `over` lets us apply a function over the focused value of a lens.
 
 [source, clojure]
 ----
@@ -169,11 +185,13 @@ us apply a function over the focused value of a lens:
 ;; => 4
 ----
 
+We have only mentioned the `id` lens. Lentes provides more lens helpers. It's
+also possible to create your own lenses for your specific needs.
 
 ==== Sequences
 
-There are some builtin lenses that can be used out of the box with sequences such as
-`fst`, `snd` and `nth`. Let see some examples on how them can be used:
+There are some builtin lenses that work on sequences. These are the `fst`,
+`snd` and `nth` lens:
 
 .Example using `fst` lens
 [source, clojure]
@@ -281,8 +299,9 @@ and viceversa:
 
 ==== Conditionals
 
-And conditional lenses that can be defined using a predicate function and returns a
-lens that focuses in an element only if it passes the predicate:
+Conditional lenses are defined using a predicate function as argument.
+It only focuses on the value when the called predicate returns true.
+The predicate is called with the value as argument.
 
 .Example focusing using conditional lenses
 [source, clojure]
