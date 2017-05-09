@@ -4,17 +4,19 @@
 <meta charset="UTF-8">
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 1.5.4">
+<meta name="generator" content="Asciidoctor 1.5.5">
 <title>lentes - lenses for clojure(script)</title>
 <style>
 .listingblock .pygments .hll { background-color: #ffffcc }
-.listingblock .pygments  { background: #f0f0f0; }
+.listingblock .pygments, .listingblock .pygments code { background: #f0f0f0; }
 .listingblock .pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
 .listingblock .pygments .tok-err { border: 1px solid #FF0000 } /* Error */
 .listingblock .pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
 .listingblock .pygments .tok-o { color: #666666 } /* Operator */
+.listingblock .pygments .tok-ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
 .listingblock .pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
 .listingblock .pygments .tok-cp { color: #007020 } /* Comment.Preproc */
+.listingblock .pygments .tok-cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
 .listingblock .pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
 .listingblock .pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
 .listingblock .pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
@@ -54,8 +56,10 @@
 .listingblock .pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
 .listingblock .pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
 .listingblock .pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
+.listingblock .pygments .tok-sa { color: #4070a0 } /* Literal.String.Affix */
 .listingblock .pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
 .listingblock .pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
+.listingblock .pygments .tok-dl { color: #4070a0 } /* Literal.String.Delimiter */
 .listingblock .pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
 .listingblock .pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
 .listingblock .pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
@@ -66,9 +70,11 @@
 .listingblock .pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
 .listingblock .pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
 .listingblock .pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
+.listingblock .pygments .tok-fm { color: #06287e } /* Name.Function.Magic */
 .listingblock .pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
 .listingblock .pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
 .listingblock .pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
+.listingblock .pygments .tok-vm { color: #bb60d5 } /* Name.Variable.Magic */
 .listingblock .pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic|Liberation+Mono:400|Roboto+Slab:400,700"/>
@@ -115,13 +121,13 @@
 <h2 id="introduction"><a class="link" href="#introduction">Introduction</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>This is an implementation of functional references modeled as functions (in the same
-way as transducers). Is a generalization of get and put mapping to the particular
-part of a data structure.</p>
+<p>Lentes is an implementation of functional references modeled as functions
+(in the same way as transducers). Lenses are a generalization of get and put
+mapping to a particular part of a data structure.</p>
 </div>
 <div class="paragraph">
-<p>Please, see <a href="#quick-start">Quick Start</a> section in order to understand it better
-seeing some example code.</p>
+<p>Please see the <a href="#examples">Quick Start</a> for an overview of what lentes has to
+offer.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -130,8 +136,8 @@ seeing some example code.</p>
 <div class="title">Note</div>
 </td>
 <td class="content">
-This documentation does not covers all api, so if you miss some function,
-contributions are very welcome. You can see the full <a href="api/index.html#id">API documentation here</a>.
+This documentation does not cover all of the API. You can browse the full
+<a href="api/index.html#id">API documentation here</a>.
 </td>
 </tr>
 </table>
@@ -161,13 +167,13 @@ dependency vector on your <strong><em>project.clj</em></strong> file:</p>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Do not be scared with the package name and its description. It is pretty
-strighforward to use and understand. The lense consists in a couple of functions
-responsibles for transform data structures in both directions.</p>
+straightforward to use and understand. A lens consists out of couple of
+functions responsible for reading and altering nested data structures.</p>
 </div>
 <div class="sect2">
 <h3 id="introduction-to-lenses"><a class="link" href="#introduction-to-lenses">Introduction to lenses</a></h3>
 <div class="paragraph">
-<p>Let&#8217;s create a couple of functions for getter and setter:</p>
+<p>Let&#8217;s create a getter and setter function:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -181,7 +187,7 @@ responsibles for transform data structures in both directions.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Now, you can use that functions for access or modify data:</p>
+<p>These can be used to access or modify data:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -195,7 +201,7 @@ responsibles for transform data structures in both directions.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Now, we can generalize that using <strong>lenses abstraction</strong>:</p>
+<p>We can generalize the getting and setting using <strong>lenses abstraction</strong>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -211,8 +217,9 @@ responsibles for transform data structures in both directions.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>This all code can be awoided just using a one of the great bunch of helpers that
-comes with lentes library out of the box (explained later):</p>
+<p>Lentes comes with some helpers for creating commonly used lenses. As a result
+we don&#8217;t have to write our own <code>my-getter</code> and <code>my-setter</code> functions for common
+use-cases. Keep reading to find out what helpers are provided with lentes.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -229,9 +236,9 @@ comes with lentes library out of the box (explained later):</p>
 <div class="sect2">
 <h3 id="working-with-atoms"><a class="link" href="#working-with-atoms">Working with atoms</a></h3>
 <div class="paragraph">
-<p>But, the best part is coming where you are using atoms for store your state and want
-to create other (derived atoms) that acts like a limited version of the original
-atom, also called materialized view. That you can do with <code>l/derive</code> function:</p>
+<p>Lentes succinctly interfaces with atoms. The <code>l/derive</code> function allows you to
+create derived atoms that act like limited versions of the original atom. This
+technique is also named <code>materialized views</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -258,10 +265,10 @@ executed until is really needed) and <strong>smart</strong> (does not trigger wa
 focused data is not affected).</p>
 </div>
 <div class="paragraph">
-<p>This is specially useful, when you want to create a materialized views of the global
-state and use them together with <a href="https://github.com/tonsky/rum">rum</a> facilities
-for react on atom changes, allowing components rerender only when the affected state
-is changed.</p>
+<p>This is especially useful, when you want to create materialized views of the
+global state, and use them together with
+<a href="https://github.com/tonsky/rum">rum</a> facilities to react on atom changes,
+allowing components to re-render only when the affected state is changed.</p>
 </div>
 </div>
 </div>
@@ -270,16 +277,30 @@ is changed.</p>
 <h2 id="reference"><a class="link" href="#reference">Reference</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>This section tries to explain the basic api of lenses and its composition that later
-can be used for derive atoms from other atoms.</p>
+<p>Lentes offers functions to easily define composable lenses</p>
+</div>
+<div class="paragraph">
+<p>Just as important are a handful of functions that take a lens and data. When
+called they return either the value or modified data.</p>
+</div>
+<div class="paragraph">
+<p>The examples below cover basic usage of lentes' lenses.
+It also demonstrates what the <code>focus</code>, <code>put</code> and <code>over</code> functions do.</p>
 </div>
 <div class="sect2">
 <h3 id="builtin-lenses"><a class="link" href="#builtin-lenses">Builtin lenses</a></h3>
 <div class="sect3">
 <h4 id="identity"><a class="link" href="#identity">Identity</a></h4>
 <div class="paragraph">
-<p>We&#8217;ll start by using the most basic lens, the identity lens. We can get the value
-a lens is focused on using the <code>focus</code> function in <code>lentes.core</code> ns:</p>
+<p>The most basic lens is the <code>identity</code> lens. It allows you to get and set the data
+as is.</p>
+</div>
+<div class="paragraph">
+<p>The <code>focus</code> function allows you to get the value the lens is "focused" on.</p>
+</div>
+<div class="paragraph">
+<p>In this example we create an identity lens. We then call the focus function
+with the lens and a vector as arguments. It doesn&#8217;t get any simpler then this.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -290,8 +311,20 @@ a lens is focused on using the <code>focus</code> function in <code>lentes.core<
 </div>
 </div>
 <div class="paragraph">
-<p>We have two other primitives available: the <code>put</code> operation and <code>over</code>, which lets
-us apply a function over the focused value of a lens:</p>
+<p>As you can see <code>focus</code> just returned the data as is.</p>
+</div>
+<div class="paragraph">
+<p>We have two other core functions:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>put</code> allows us to set a value a lens is focusing on.</p>
+</li>
+<li>
+<p><code>over</code> lets us apply a function over the focused value of a lens.</p>
+</li>
+</ul>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -302,15 +335,19 @@ us apply a function over the focused value of a lens:</p>
 <span class="tok-c1">;; =&gt; 4</span></code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>We have only mentioned the <code>id</code> lens. Lentes provides more lens helpers. It&#8217;s
+also possible to create your own lenses for your specific needs.</p>
+</div>
 </div>
 <div class="sect3">
 <h4 id="sequences"><a class="link" href="#sequences">Sequences</a></h4>
 <div class="paragraph">
-<p>There are some builtin lenses that can be used out of the box with sequences such as
-<code>fst</code>, <code>snd</code> and <code>nth</code>. Let see some examples on how them can be used:</p>
+<p>There are some builtin lenses that work on sequences. These are the <code>fst</code>,
+<code>snd</code> and <code>nth</code> lens:</p>
 </div>
 <div class="listingblock">
-<div class="title">Example using <code>fst</code> lense</div>
+<div class="title">Example using <code>fst</code> lens</div>
 <div class="content">
 <pre class="pygments highlight"><code data-lang="clojure"><span class="tok-c1">;; Focus over the first element of a vector</span>
 <span class="tok-p">(</span><span class="tok-nf">l/focus</span> <span class="tok-nv">l/fst</span> <span class="tok-p">[</span><span class="tok-mi">1</span> <span class="tok-mi">2</span> <span class="tok-mi">3</span><span class="tok-p">])</span>
@@ -326,7 +363,7 @@ us apply a function over the focused value of a lens:</p>
 </div>
 </div>
 <div class="listingblock">
-<div class="title">Example using the <code>nth</code> lense</div>
+<div class="title">Example using the <code>nth</code> lens</div>
 <div class="content">
 <pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">l/focus</span> <span class="tok-p">(</span><span class="tok-nf">l/nth</span> <span class="tok-mi">2</span><span class="tok-p">)</span> <span class="tok-p">[</span><span class="tok-mi">1</span> <span class="tok-mi">2</span> <span class="tok-mi">3</span><span class="tok-p">])</span>
 <span class="tok-c1">;; =&gt; 3</span>
@@ -375,7 +412,7 @@ us apply a function over the focused value of a lens:</p>
 <p><code>in</code> for focusing on a path:</p>
 </div>
 <div class="listingblock">
-<div class="title">Example focusing in neest data structures</div>
+<div class="title">Example focusing in nested data structures</div>
 <div class="content">
 <pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">l/focus</span> <span class="tok-p">(</span><span class="tok-nf">l/in</span> <span class="tok-p">[</span><span class="tok-ss">:a</span> <span class="tok-ss">:b</span><span class="tok-p">])</span>
          <span class="tok-p">{</span><span class="tok-ss">:a</span> <span class="tok-p">{</span><span class="tok-ss">:b</span> <span class="tok-p">{</span><span class="tok-ss">:c</span> <span class="tok-mi">42</span><span class="tok-p">}}})</span>
@@ -397,7 +434,7 @@ called <code>units</code>. We have to supply a function to convert from unit <co
 and viceversa:</p>
 </div>
 <div class="listingblock">
-<div class="title">Example definiting a "unit conversion" lense</div>
+<div class="title">Example defining a "unit conversion" lens</div>
 <div class="content">
 <pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-kd">defn </span><span class="tok-nv">sec-&gt;min</span> <span class="tok-p">[</span><span class="tok-nv">sec</span><span class="tok-p">]</span> <span class="tok-p">(</span><span class="tok-nb">/ </span><span class="tok-nv">sec</span> <span class="tok-mi">60</span><span class="tok-p">))</span>
 <span class="tok-p">(</span><span class="tok-kd">defn </span><span class="tok-nv">min-&gt;sec</span> <span class="tok-p">[</span><span class="tok-nv">min</span><span class="tok-p">]</span> <span class="tok-p">(</span><span class="tok-nb">* min </span><span class="tok-mi">60</span><span class="tok-p">))</span>
@@ -419,8 +456,9 @@ and viceversa:</p>
 <div class="sect3">
 <h4 id="conditionals"><a class="link" href="#conditionals">Conditionals</a></h4>
 <div class="paragraph">
-<p>And conditional lenses that can be defined using a predicate function and returns a
-lens that focuses in an element only if it passes the predicate:</p>
+<p>Conditional lenses are defined using a predicate function as argument.
+It only focuses on the value when the called predicate returns true.
+The predicate is called with the value as argument.</p>
 </div>
 <div class="listingblock">
 <div class="title">Example focusing using conditional lenses</div>
@@ -449,8 +487,8 @@ lens that focuses in an element only if it passes the predicate:</p>
 <div class="sect2">
 <h3 id="composition"><a class="link" href="#composition">Composition</a></h3>
 <div class="paragraph">
-<p>One of the big advantatges of this lenses implementation is because it is
-implemented in termps of function composition, much in the same line as
+<p>One of the big advantages of this lenses implementation is because it is
+implemented in terms of function composition, much in the same line as
 transducers. Let see a example:</p>
 </div>
 <div class="listingblock">
@@ -540,7 +578,7 @@ node ./out/tests.js</code></pre>
 </div>
 </div>
 <div class="listingblock">
-<div class="title">Run tests on jvm platform</div>
+<div class="title">Run tests on JVM platform</div>
 <div class="content">
 <pre>lein test</pre>
 </div>
@@ -585,7 +623,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2016-09-30 23:33:08 CEST
+Last updated 2017-05-09 11:57:22 CEST
 </div>
 </div>
 </body>
