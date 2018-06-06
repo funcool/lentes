@@ -173,17 +173,20 @@
                      ^:unsynchronized-mutable watchers
                      ^:unsynchronized-mutable srccache
                      ^:unsynchronized-mutable oldcache
-                     ^:unsynchronized-mutable cache]
+                     ^:unsynchronized-mutable cache
+                     ^:unsynchronized-mutable zsrccache
+                     ^:unsynchronized-mutable zoldcache
+                     ^:unsynchronized-mutable zcache]
      clojure.lang.IDeref
      (deref [self]
        (locking self
-         (if (identical? srccache @src)
-           cache
+         (if (identical? zsrccache @src)
+           zcache
            (let [source (deref src)
                  result (focus lens source)]
-             (set! (.-srccache self) source)
-             (set! (.-oldcache self) (.-cache self))
-             (set! (.-cache self) result)
+             (set! (.-zsrccache self) source)
+             (set! (.-zoldcache self) (.-zcache self))
+             (set! (.-zcache self) result)
              result))))
 
      clojure.lang.IAtom
@@ -304,17 +307,20 @@
                      ^:unsynchronized-mutable watchers
                      ^:unsynchronized-mutable srccache
                      ^:unsynchronized-mutable oldcache
-                     ^:unsynchronized-mutable cache]
+                     ^:unsynchronized-mutable cache
+                     ^:unsynchronized-mutable zsrccache
+                     ^:unsynchronized-mutable zoldcache
+                     ^:unsynchronized-mutable zcache]
      clojure.lang.IDeref
      (deref [self]
        (locking self
-         (if (identical? srccache @src)
-           cache
+         (if (identical? zsrccache @src)
+           zcache
            (let [source (deref src)
                  result (focus lens source)]
-             (set! (.-srccache self) source)
-             (set! (.-oldcache self) (.-cache self))
-             (set! (.-cache self) result)
+             (set! (.-zsrccache self) source)
+             (set! (.-zoldcache self) (.-zcache self))
+             (set! (.-zcache self) result)
              result))))
 
      clojure.lang.IRef
@@ -412,5 +418,5 @@
                    check-equals? true}}]
    (let [id (gensym "lentes-derived-atom")]
      (if read-only?
-       (ROFocus. id lens src check-equals? nil +empty+ +empty+ +empty+)
-       (RWFocus. id lens src check-equals? nil +empty+ +empty+ +empty+)))))
+       (ROFocus. id lens src check-equals? nil +empty+ +empty+ +empty+ +empty+ +empty+ +empty+)
+       (RWFocus. id lens src check-equals? nil +empty+ +empty+ +empty+ +empty+ +empty+ +empty+)))))
