@@ -4,9 +4,9 @@
 ;; constructors
 
 (defn lens
-  "Given a function for getting the focused value from a state (getter)
-  and a function that takes the state and and update function (setter),
-  constructs a lens."
+  "Given a function for getting the focused value from a state
+  (getter) and a function that takes the state and and update
+  function (setter), constructs a lens."
   ([getter]
    (fn [next]
      (fn
@@ -169,7 +169,7 @@
   #?(:clj (Object.) :cljs (js/Object.)))
 
 #?(:clj
-   (deftype RWFocus [id lens src check-equals?
+   (deftype RWFocus [id lens src equals?
                      ^:unsynchronized-mutable watchers
                      ^:unsynchronized-mutable srccache
                      ^:unsynchronized-mutable oldcache
@@ -177,14 +177,14 @@
      clojure.lang.IDeref
      (deref [self]
        (locking self
-         (if (identical? srccache @src)
-           cache
-           (let [source (deref src)
-                 result (focus lens source)]
-             (set! (.-srccache self) source)
-             (set! (.-oldcache self) (.-cache self))
-             (set! (.-cache self) result)
-             result))))
+         (let [source (deref src)]
+           (if (identical? srccache source)
+             cache
+             (let [result (focus lens source)]
+               (set! (.-srccache self) source)
+               (set! (.-oldcache self) (.-cache self))
+               (set! (.-cache self) result)
+               result)))))
 
      clojure.lang.IAtom
      (reset [self newval]
@@ -206,21 +206,17 @@
      clojure.lang.IRef
      (addWatch [self key cb]
        (letfn [(run-watchers [oldv newv]
-                 (doseq [[key wf] (.-watchers self)]
-                   (wf key self oldv newv)))
+                 (run! (fn [[key wf]] (wf key self oldv newv))
+                       (.-watchers self)))
                (main-watcher [_ _ oldv newv]
                  (locking self
-                   (if (identical? newv (.-srccache self))
-                     (if-not check-equals?
-                       (run-watchers (.-oldcache self)
-                                     (.-cache self)))
+                   (when-not (identical? newv (.-srccache self))
                      (let [old' (focus lens oldv)
                            new' (focus lens newv)]
                        (set! (.-cache self) new')
                        (set! (.-oldcache self) old')
                        (set! (.-srccache self) newv)
-                       (if (or (not check-equals?)
-                               (not= old' new'))
+                       (when-not (equals? old' new')
                          (run-watchers old' new'))))))]
          (locking self
            (set! (.-watchers self) (assoc watchers key cb))
@@ -235,7 +231,7 @@
            (remove-watch src id)))))
 
    :cljs
-   (deftype RWFocus [id lens src check-equals?
+   (deftype RWFocus [id lens src equals?
                      ^:mutable watchers
                      ^:mutable srccache
                      ^:mutable oldcache
@@ -243,14 +239,14 @@
      IAtom
      IDeref
      (-deref [self]
-       (if (identical? srccache @src)
-         cache
-         (let [source (deref src)
-               result (focus lens source)]
-           (set! (.-srccache self) source)
-           (set! (.-oldcache self) (.-cache self))
-           (set! (.-cache self) result)
-           result)))
+       (let [source (deref src)]
+         (if (identical? srccache source)
+           cache
+           (let [result (focus lens source)]
+             (set! (.-srccache self) source)
+             (set! (.-oldcache self) (.-cache self))
+             (set! (.-cache self) result)
+             result))))
 
      IReset
      (-reset! [self newval]
@@ -274,24 +270,22 @@
      IWatchable
      (-add-watch [self key cb]
        (letfn [(run-watchers [oldv newv]
-                 (doseq [[key wf] (.-watchers self)]
-                   (wf key self oldv newv)))
+                 (run! (fn [[key wf]] (wf key self oldv newv))
+                       (.-watchers self)))
                (main-watcher [_ _ oldv newv]
-                 (if (identical? newv (.-srccache self))
-                   (if-not check-equals?
-                     (run-watchers (.-oldcache self)
-                                   (.-cache self)))
-                   (let [old' (focus lens oldv)
-                         new' (focus lens newv)]
-                     (set! (.-cache self) new')
-                     (set! (.-oldcache self) old')
-                     (set! (.-srccache self) newv)
-                     (if (or (not check-equals?)
-                             (not= old' new'))
-                       (run-watchers old' new')))))]
-         (set! (.-watchers self) (assoc watchers key cb))
-         (when (= (count (.-watchers self)) 1)
-           (add-watch src id main-watcher))
+                 (locking self
+                   (when-not (identical? newv (.-srccache self))
+                     (let [old' (focus lens oldv)
+                           new' (focus lens newv)]
+                       (set! (.-cache self) new')
+                       (set! (.-oldcache self) old')
+                       (set! (.-srccache self) newv)
+                       (when-not (equals? old' new')
+                         (run-watchers old' new'))))))]
+         (locking self
+           (set! (.-watchers self) (assoc watchers key cb))
+           (when (= (count (.-watchers self)) 1)
+             (add-watch src id main-watcher)))
          self))
 
      (-remove-watch [self key]
@@ -300,7 +294,7 @@
          (remove-watch src id)))))
 
 #?(:clj
-   (deftype ROFocus [id lens src check-equals?
+   (deftype ROFocus [id lens src equals?
                      ^:unsynchronized-mutable watchers
                      ^:unsynchronized-mutable srccache
                      ^:unsynchronized-mutable oldcache
@@ -308,33 +302,29 @@
      clojure.lang.IDeref
      (deref [self]
        (locking self
-         (if (identical? srccache @src)
-           cache
-           (let [source (deref src)
-                 result (focus lens source)]
-             (set! (.-srccache self) source)
-             (set! (.-oldcache self) (.-cache self))
-             (set! (.-cache self) result)
-             result))))
+         (let [source (deref src)]
+           (if (identical? srccache source)
+             cache
+             (let [result (focus lens source)]
+               (set! (.-srccache self) source)
+               (set! (.-oldcache self) (.-cache self))
+               (set! (.-cache self) result)
+               result)))))
 
      clojure.lang.IRef
      (addWatch [self key cb]
        (letfn [(run-watchers [oldv newv]
-                 (doseq [[key wf] (.-watchers self)]
-                   (wf key self oldv newv)))
+                 (run! (fn [[key wf]] (wf key self oldv newv))
+                       (.-watchers self)))
                (main-watcher [_ _ oldv newv]
                  (locking self
-                   (if (identical? newv (.-srccache self))
-                     (if-not check-equals?
-                       (run-watchers (.-oldcache self)
-                                     (.-cache self)))
+                   (when-not (identical? newv (.-srccache self))
                      (let [old' (focus lens oldv)
                            new' (focus lens newv)]
                        (set! (.-cache self) new')
                        (set! (.-oldcache self) old')
                        (set! (.-srccache self) newv)
-                       (if (or (not check-equals?)
-                               (not= old' new'))
+                       (when-not (equals? old' new')
                          (run-watchers old' new'))))))]
          (locking self
            (set! (.-watchers self) (assoc watchers key cb))
@@ -349,39 +339,35 @@
            (remove-watch src id)))))
 
    :cljs
-   (deftype ROFocus [id lens src check-equals?
+   (deftype ROFocus [id lens src equals?
                      ^:mutable watchers
                      ^:mutable srccache
                      ^:mutable oldcache
                      ^:mutable cache]
      IDeref
      (-deref [self]
-       (if (identical? srccache @src)
-         cache
-         (let [source (deref src)
-               result (focus lens source)]
-           (set! (.-srccache self) source)
-           (set! (.-oldcache self) (.-cache self))
-           (set! (.-cache self) result)
-           result)))
+       (let [source (deref src)]
+         (if (identical? srccache source)
+           cache
+           (let [result (focus lens source)]
+             (set! (.-srccache self) source)
+             (set! (.-oldcache self) (.-cache self))
+             (set! (.-cache self) result)
+             result))))
 
      IWatchable
      (-add-watch [self key cb]
        (letfn [(run-watchers [oldv newv]
-                 (doseq [[key wf] (.-watchers self)]
-                   (wf key self oldv newv)))
+                 (run! (fn [[key wf]] (wf key self oldv newv))
+                       (.-watchers self)))
                (main-watcher [_ _ oldv newv]
-                 (if (identical? newv (.-srccache self))
-                   (if-not check-equals?
-                     (run-watchers (.-oldcache self)
-                                   (.-cache self)))
+                 (when-not (identical? newv (.-srccache self))
                    (let [old' (focus lens oldv)
                          new' (focus lens newv)]
                      (set! (.-cache self) new')
                      (set! (.-oldcache self) old')
                      (set! (.-srccache self) newv)
-                     (if (or (not check-equals?)
-                             (not= old' new'))
+                     (when-not (equals? old' new')
                        (run-watchers old' new')))))]
          (set! (.-watchers self) (assoc watchers key cb))
          (when (= (count (.-watchers self)) 1)
@@ -396,21 +382,25 @@
 (defn derive
   "Create a derived atom from an other atom with the provided lense.
 
-  The returned atom is lazy, so no code is executed until user requires it.
+  The returned atom is lazy, so no code is executed until user
+  requires it.
 
-  By default the deriveed atom does not trigger updates if the data does not
-  affects to it (determined by lense), but this behavior can be deactivated
-  passing `:check-equals?` to `false` on the third options parameter.
+  By default the derived atom does not trigger updates if the data
+  does not affects to it (determined by lense), but this behavior can
+  be deactivated passing `:equals?` to `false` on the third options
+  parameter. You also may pass `=` as `equals?` parameter if you want
+  value comparison instead of reference comparison with `identical?`.
 
-  You can create expliclitly read only refs (not atoms, because the returned
-  object satisifies watchable and ref but not atom interface) passing
-  `:read-only?` as `true` as option on the optional third parameter."
+  You can create expliclitly read only refs (not atoms, because the
+  returned object satisifies watchable and ref but not atom interface)
+  passing `:read-only?` as `true` as option on the optional third
+  parameter."
   ([lens src]
    (derive lens src nil))
-  ([lens src {:keys [read-only? check-equals?]
+  ([lens src {:keys [read-only? equals?]
               :or {read-only? false
-                   check-equals? true}}]
-   (let [id (gensym "lentes-derived-atom")]
+                   equals? identical?}}]
+   (let [id (gensym "lentes-ref")]
      (if read-only?
-       (ROFocus. id lens src check-equals? nil +empty+ +empty+ +empty+)
-       (RWFocus. id lens src check-equals? nil +empty+ +empty+ +empty+)))))
+       (ROFocus. id lens src equals? nil +empty+ +empty+ +empty+)
+       (RWFocus. id lens src equals? nil +empty+ +empty+ +empty+)))))

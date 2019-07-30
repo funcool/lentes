@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>funcool</groupId>
+  <artifactId>lentes</artifactId>
+  <packaging>jar</packaging>
+  <version>1.3.0-SNAPSHOT</version>
+  <name>lentes</name>
+  <description>Functional references for Clojure and ClojureScript</description>
+  <url>https://github.com/funcool/lentes</url>
+  <licenses>
+    <license>
+      <name>BSD (2-Clause)</name>
+      <url>http://opensource.org/licenses/BSD-2-Clause</url>
+    </license>
+  </licenses>
+  <scm>
+    <connection>scm:git:git://github.com/funcool/lentes.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/funcool/lentes.git</developerConnection>
+    <tag>3cef70b668a73676907de92dc9e5f7ed62823565
+</tag>
+    <url>https://github.com/funcool/lentes</url>
+  </scm>
+  <build>
+    <sourceDirectory>src</sourceDirectory>
+    <testSourceDirectory>test</testSourceDirectory>
+    <resources>
+      <resource>
+        <directory>resources</directory>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <directory>resources</directory>
+      </testResource>
+    </testResources>
+    <directory>target</directory>
+    <outputDirectory>target/classes</outputDirectory>
+    <plugins/>
+  </build>
+  <repositories>
+    <repository>
+      <id>clojars</id>
+      <url>https://repo.clojars.org/</url>
+    </repository>
+  </repositories>
+  <dependencies/>
+</project>

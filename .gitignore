@@ -1,7 +1,6 @@
 /target
 /classes
 /checkouts
-pom.xml
 pom.xml.asc
 *.jar
 *.class
@@ -13,3 +12,5 @@ pom.xml.asc
 /repl
 /node_modules
 /nashorn_code_cache
+/.cpcache
+/.rebel_readline_history
