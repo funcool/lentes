@@ -4,7 +4,7 @@
   <groupId>funcool</groupId>
   <artifactId>lentes</artifactId>
   <packaging>jar</packaging>
-  <version>1.3.2</version>
+  <version>1.3.3</version>
   <name>lentes</name>
   <description>Functional references for Clojure and ClojureScript</description>
   <url>https://github.com/funcool/lentes</url>
@@ -17,7 +17,7 @@
   <scm>
     <connection>scm:git:git://github.com/funcool/lentes.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/funcool/lentes.git</developerConnection>
-    <tag>b6a4790a3fdd23cdb6f57e1ec71846b68f0c0595</tag>
+    <tag>master</tag>
     <url>https://github.com/funcool/lentes</url>
   </scm>
   <build>

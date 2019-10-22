@@ -1,5 +1,11 @@
 # Changelog #
 
+## Version 1.3.3 ##
+
+Date: 2019-10-22
+
+- Fix jvm impl (bug introduced in previous commits).
+
 
 ## Version 1.3.2 ##
 

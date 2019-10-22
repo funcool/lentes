@@ -144,21 +144,6 @@
   [key id]
   (keyword (str id "-" (name key))))
 
-(defn- make-watcher
-  [self lens equals?]
-  (letfn [(run-watchers [oldv newv]
-            (run! (fn [[key wf]] (wf key self oldv newv))
-                  (.-watchers self)))]
-    (fn [_ _ oldv newv]
-      (when-not (identical? newv (.-srccache self))
-        (let [old' (focus lens oldv)
-              new' (focus lens newv)]
-          (set! (.-cache self) new')
-          (set! (.-oldcache self) old')
-          (set! (.-srccache self) newv)
-          (when-not (equals? old' new')
-            (run-watchers old' new')))))))
-
 #?(:clj
    (deftype RWFocus [id lens src equals?
                      ^:unsynchronized-mutable watchers
@@ -199,7 +184,19 @@
        (locking self
          (set! (.-watchers self) (assoc watchers key cb))
          (when (= (count (.-watchers self)) 1)
-           (add-watch src id (make-watcher self lens equals?)))
+           (letfn [(run-watchers [oldv newv]
+                     (run! (fn [[key wf]] (wf key self oldv newv))
+                           (.-watchers self)))
+                   (main-watcher [_ _ oldv newv]
+                     (when-not (identical? newv (.-srccache self))
+                       (let [old' (focus lens oldv)
+                             new' (focus lens newv)]
+                         (set! (.-cache self) new')
+                         (set! (.-oldcache self) old')
+                         (set! (.-srccache self) newv)
+                         (when-not (equals? old' new')
+                           (run-watchers old' new')))))]
+             (add-watch src id main-watcher)))
          self))
 
      (removeWatch [self key]
@@ -249,7 +246,19 @@
      (-add-watch [self key cb]
        (set! (.-watchers self) (assoc watchers key cb))
        (when (= (count (.-watchers self)) 1)
-         (add-watch src id (make-watcher self lens equals?)))
+         (letfn [(run-watchers [oldv newv]
+                   (run! (fn [[key wf]] (wf key self oldv newv))
+                         (.-watchers self)))
+                 (main-watcher [_ _ oldv newv]
+                   (when-not (identical? newv (.-srccache self))
+                     (let [old' (focus lens oldv)
+                           new' (focus lens newv)]
+                       (set! (.-cache self) new')
+                       (set! (.-oldcache self) old')
+                       (set! (.-srccache self) newv)
+                       (when-not (equals? old' new')
+                         (run-watchers old' new')))))]
+           (add-watch src id main-watcher)))
        self)
 
      (-remove-watch [self key]
@@ -280,7 +289,19 @@
        (locking self
          (set! (.-watchers self) (assoc watchers key cb))
          (when (= (count (.-watchers self)) 1)
-           (add-watch src id (make-watcher self lens equals?)))
+           (letfn [(run-watchers [oldv newv]
+                     (run! (fn [[key wf]] (wf key self oldv newv))
+                           (.-watchers self)))
+                   (main-watcher [_ _ oldv newv]
+                     (when-not (identical? newv (.-srccache self))
+                       (let [old' (focus lens oldv)
+                             new' (focus lens newv)]
+                         (set! (.-cache self) new')
+                         (set! (.-oldcache self) old')
+                         (set! (.-srccache self) newv)
+                         (when-not (equals? old' new')
+                           (run-watchers old' new')))))]
+             (add-watch src id main-watcher)))
          self))
 
      (removeWatch [self key]
@@ -310,7 +331,19 @@
      (-add-watch [self key cb]
        (set! (.-watchers self) (assoc watchers key cb))
        (when (= (count (.-watchers self)) 1)
-         (add-watch src id (make-watcher self lens equals?)))
+         (letfn [(run-watchers [oldv newv]
+                   (run! (fn [[key wf]] (wf key self oldv newv))
+                         (.-watchers self)))
+                 (main-watcher [_ _ oldv newv]
+                   (when-not (identical? newv (.-srccache self))
+                     (let [old' (focus lens oldv)
+                           new' (focus lens newv)]
+                       (set! (.-cache self) new')
+                       (set! (.-oldcache self) old')
+                       (set! (.-srccache self) newv)
+                       (when-not (equals? old' new')
+                         (run-watchers old' new')))))]
+           (add-watch src id main-watcher)))
        self)
 
      (-remove-watch [self key]

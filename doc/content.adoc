@@ -1,4 +1,5 @@
 = lentes - lenses for clojure(script)
+Andrey Antukh, <niwi@niwi.nz>
 :toc: left
 :!numbered:
 :idseparator: -
@@ -10,15 +11,13 @@
 
 == Introduction
 
-Lentes is an implementation of functional references modeled as functions
-(in the same way as transducers). Lenses are a generalization of get and put
-mapping to a particular part of a data structure.
+Lentes is an implementation of functional references modeled as
+functions (in the same way as transducers). Lenses are a
+generalization of get and put mapping to a particular part of a data
+structure.
 
-Please see the <<examples, Quick Start>> for an overview of what lentes has to
-offer.
-
-NOTE: This documentation does not cover all of the API. You can browse the full
-link:api/index.html#id[API documentation here].
+Please see the <<examples, Quick Start>> for an overview of what
+lentes has to offer.
 
 
 === Project Maturity
@@ -33,7 +32,7 @@ dependency vector on your *_project.clj_* file:
 
 [source, clojure]
 ----
-[funcool/lentes "1.3.2"]
+[funcool/lentes "1.3.3"]
 ----
 
 
@@ -43,6 +42,7 @@ dependency vector on your *_project.clj_* file:
 Do not be scared with the package name and its description. It is pretty
 straightforward to use and understand. A lens consists out of couple of
 functions responsible for reading and altering nested data structures.
+
 
 === Introduction to lenses
 
@@ -87,9 +87,10 @@ We can generalize the getting and setting using *lenses abstraction*:
 ;; => {:foo 2 :bar 2}
 ----
 
-Lentes comes with some helpers for creating commonly used lenses. As a result
-we don't have to write our own `my-getter` and `my-setter` functions for common
-use-cases. Keep reading to find out what helpers are provided with lentes.
+Lentes comes with some helpers for creating commonly used lenses. As a
+result we don't have to write our own `my-getter` and `my-setter`
+functions for common use-cases. Keep reading to find out what helpers
+are provided with lentes.
 
 [source, clojure]
 ----
@@ -102,11 +103,12 @@ use-cases. Keep reading to find out what helpers are provided with lentes.
 ;; => {:foo 2 :bar 2}
 ----
 
+
 === Working with atoms
 
-Lentes succinctly interfaces with atoms. The `l/derive` function allows you to
-create derived atoms that act like limited versions of the original atom. This
-technique is also named `materialized views`.
+Lentes succinctly interfaces with atoms. The `l/derive` function
+allows you to create derived atoms that act like limited versions of
+the original atom. This technique is also named `materialized views`.
 
 [source, clojure]
 ----
@@ -394,13 +396,13 @@ For running tests just execute this:
 .Run tests on node platform
 [source, text]
 ----
-./scripts/build
-node ./out/tests.js
+clojure -Adev tools build:tests
+node ./target/tests.js
 ----
 
 .Run tests on JVM platform
 ----
-lein test
+clojure -Adev -m lentes.tests
 ----
 
 
@@ -409,7 +411,7 @@ lein test
 _lentes_ is licensed under BSD (2-Clause) license:
 
 ----
-Copyright (c) 2015-2016 Andrey Antukh <niwi@niwi.nz>
+Copyright (c) 2015-2019 Andrey Antukh <niwi@niwi.nz>
 
 All rights reserved.
 
