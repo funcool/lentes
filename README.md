@@ -7,4 +7,4 @@
 
 ## Documentation ##
 
-**Documentation**: https://cljdoc.org/d/funcool/promesa/CURRENT
+**Documentation**: https://cljdoc.org/d/funcool/lentes/CURRENT
