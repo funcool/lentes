@@ -127,38 +127,41 @@ technique is also named `materialized views`.
 ;; => {:foo 2 :bar 2}
 ----
 
-The derived atoms has very useful properties such as they are *lazy* (no code
-executed until is really needed) and *smart* (does not trigger watches if the
-focused data is not affected).
+The derived atoms has very useful properties such as they are *lazy*
+(no code executed until is really needed) and *smart* (does not
+trigger watches if the focused data is not affected).
 
-This is especially useful, when you want to create materialized views of the
-global state, and use them together with
-link:https://github.com/tonsky/rum[rum] facilities to react on atom changes,
-allowing components to re-render only when the affected state is changed.
+This is especially useful, when you want to create materialized views
+of the global state, and use them together with
+link:https://github.com/tonsky/rum[rum] facilities to react on atom
+changes, allowing components to re-render only when the affected state
+is changed.
 
 
 == Reference
 
-Lentes offers functions to easily define composable lenses
+Lentes offers functions to easily define composable lenses.
 
-Just as important are a handful of functions that take a lens and data. When
-called they return either the value or modified data.
+Just as important are a handful of functions that take a lens and
+data. When called they return either the value or modified data.
 
-The examples below cover basic usage of lentes' lenses.
-It also demonstrates what the `focus`, `put` and `over` functions do.
+The examples below cover basic usage of lentes' lenses.  It also
+demonstrates what the `focus`, `put` and `over` functions do.
 
 
 === Builtin lenses
 
 ==== Identity
 
-The most basic lens is the `identity` lens. It allows you to get and set the data
-as is.
+The most basic lens is the `identity` lens. It allows you to get and
+set the data as is.
 
-The `focus` function allows you to get the value the lens is "focused" on.
+The `focus` function allows you to get the value the lens is "focused"
+on.
 
-In this example we create an identity lens. We then call the focus function
-with the lens and a vector as arguments. It doesn't get any simpler then this.
+In this example we create an identity lens. We then call the focus
+function with the lens and a vector as arguments. It doesn't get any
+simpler then this.
 
 [source, clojure]
 ----
