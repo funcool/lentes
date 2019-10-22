@@ -1,5 +1,13 @@
 # Changelog #
 
+
+## Version 1.3.2 ##
+
+Date: 2019-10-22
+
+Same as 1.3.1 (just docs updates).
+
+
 ## Version 1.3.1 ##
 
 Date: 2019-10-22
