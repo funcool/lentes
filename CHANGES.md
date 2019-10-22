@@ -1,5 +1,20 @@
 # Changelog #
 
+## Version 1.3.1 ##
+
+Date: 2019-10-22
+
+Same as 1.3.0 (just docs updates).
+
+
+## Version 1.3.0 ##
+
+Date: 2019-10-22
+
+- Improve equality checking on derived atoms.
+- Minor code/performance improvements.
+
+
 ## Version 1.2.0 ##
 
 Date: 2016-09-30

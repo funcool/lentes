@@ -7,4 +7,4 @@
 
 ## Documentation ##
 
-http://funcool.github.io/lentes/latest/
+**Documentation**: https://cljdoc.org/d/funcool/promesa/CURRENT
