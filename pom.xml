@@ -17,6 +17,7 @@
   <scm>
     <connection>scm:git:git://github.com/funcool/lentes.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/funcool/lentes.git</developerConnection>
+    <tag>b6a4790a3fdd23cdb6f57e1ec71846b68f0c0595</tag>
     <url>https://github.com/funcool/lentes</url>
   </scm>
   <build>
