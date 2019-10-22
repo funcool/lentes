@@ -17,26 +17,10 @@
   <scm>
     <connection>scm:git:git://github.com/funcool/lentes.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/funcool/lentes.git</developerConnection>
-    <tag>3cef70b668a73676907de92dc9e5f7ed62823565
-</tag>
     <url>https://github.com/funcool/lentes</url>
   </scm>
   <build>
     <sourceDirectory>src</sourceDirectory>
-    <testSourceDirectory>test</testSourceDirectory>
-    <resources>
-      <resource>
-        <directory>resources</directory>
-      </resource>
-    </resources>
-    <testResources>
-      <testResource>
-        <directory>resources</directory>
-      </testResource>
-    </testResources>
-    <directory>target</directory>
-    <outputDirectory>target/classes</outputDirectory>
-    <plugins/>
   </build>
   <repositories>
     <repository>
@@ -44,5 +28,11 @@
       <url>https://repo.clojars.org/</url>
     </repository>
   </repositories>
-  <dependencies/>
+  <dependencies>
+    <dependency>
+      <groupId>org.clojure</groupId>
+      <artifactId>clojure</artifactId>
+      <version>1.10.1</version>
+    </dependency>
+  </dependencies>
 </project>
