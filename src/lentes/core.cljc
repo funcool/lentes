@@ -204,7 +204,6 @@
          (set! (.-watchers self) (dissoc watchers key))
          (when (empty? watchers)
            (set! (.-watchers-added self) false)
-           (set! (.-cache self) +empty+)
            (remove-watch src id)))))
 
    :cljs
@@ -264,7 +263,6 @@
        (set! (.-watchers self) (dissoc watchers key))
        (when (empty? watchers)
          (set! (.-watchers-added self) false)
-         (set! (.-cache self) +empty+)
          (remove-watch src id)))))
 
 #?(:clj
@@ -307,7 +305,6 @@
          (set! (.-watchers self) (dissoc watchers key))
          (when (empty? watchers)
            (set! (.-watchers-added self) false)
-           (set! (.-cache self) +empty+)
            (remove-watch src id)))))
 
    :cljs
@@ -347,7 +344,6 @@
        (set! (.-watchers self) (dissoc watchers key))
        (when (empty? watchers)
          (set! (.-watchers-added self) false)
-         (set! (.-cache self) +empty+)
          (remove-watch src id)))))
 
 (defn derive
