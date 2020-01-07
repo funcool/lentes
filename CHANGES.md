@@ -1,5 +1,13 @@
 # Changelog #
 
+## Version 1.4.0-SNAPSHOT
+
+Date: 2020-01-07
+
+- Fix internal cache race conditions.
+
+
+
 ## Version 1.3.3 ##
 
 Date: 2019-10-22
