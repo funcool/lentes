@@ -166,20 +166,15 @@
 
      clojure.lang.IAtom
      (reset [self newval]
-       (swap! src #(put lens newval %))
-       (deref self))
+       (focus lens (swap! src #(put lens newval %))))
      (swap [self f]
-       (swap! src (fn [s] (over lens f s)))
-       (deref self))
+       (focus lens (swap! src (fn [s] (over lens f s)))))
      (swap [self f x]
-       (swap! src (fn [s] (over lens #(f % x) s)))
-       (deref self))
+       (focus lens (swap! src (fn [s] (over lens #(f % x) s)))))
      (swap [self f x y]
-       (swap! src (fn [s] (over lens #(f % x y) s)))
-       (deref self))
+       (focus lens (swap! src (fn [s] (over lens #(f % x y) s)))))
      (swap [self f x y more]
-       (swap! src (fn [s] (over lens #(apply f % x y more) s)))
-       (deref self))
+       (focus lens (swap! src (fn [s] (over lens #(apply f % x y more) s)))))
 
      clojure.lang.IRef
      (addWatch [self key cb]
