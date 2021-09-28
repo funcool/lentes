@@ -339,7 +339,7 @@ transducers. Let see a example:
 
 [source, clojure]
 ----
-(def my-lens (comp l/fst l/fst (l/nth 2)))
+(def my-lens (comp l/fst (l/nth 2)))
 
 (def data
   [[0 1 2]
