@@ -166,20 +166,27 @@
 
      clojure.lang.IAtom
      (reset [self newval]
-       (swap! src #(put lens newval %))
-       (deref self))
+       (focus lens (swap! src #(put lens newval %))))
      (swap [self f]
-       (swap! src (fn [s] (over lens f s)))
-       (deref self))
+       (focus lens (swap! src (fn [s] (over lens f s)))))
      (swap [self f x]
-       (swap! src (fn [s] (over lens #(f % x) s)))
-       (deref self))
+       (focus lens (swap! src (fn [s] (over lens #(f % x) s)))))
      (swap [self f x y]
-       (swap! src (fn [s] (over lens #(f % x y) s)))
-       (deref self))
+       (focus lens (swap! src (fn [s] (over lens #(f % x y) s)))))
      (swap [self f x y more]
-       (swap! src (fn [s] (over lens #(apply f % x y more) s)))
-       (deref self))
+       (focus lens (swap! src (fn [s] (over lens #(apply f % x y more) s)))))
+
+     clojure.lang.IAtom2
+     (resetVals [self newval]
+       (mapv (partial focus lens) (swap-vals! src #(put lens newval %))))
+     (swapVals [self f]
+       (mapv (partial focus lens) (swap-vals! src (fn [s] (over lens f s)))))
+     (swapVals [self f x]
+       (mapv (partial focus lens) (swap-vals! src (fn [s] (over lens #(f % x) s)))))
+     (swapVals [self f x y]
+       (mapv (partial focus lens) (swap-vals! src (fn [s] (over lens #(f % x y) s)))))
+     (swapVals [self f x y more]
+       (mapv (partial focus lens) (swap-vals! src (fn [s] (over lens #(apply f % x y more) s)))))
 
      clojure.lang.IRef
      (addWatch [self key cb]
