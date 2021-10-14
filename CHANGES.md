@@ -5,7 +5,7 @@
 Date: 2020-01-07
 
 - Fix internal cache race conditions.
-
+- Add Atom2 impl (thanks to @jellelicht).
 
 
 ## Version 1.3.3 ##
