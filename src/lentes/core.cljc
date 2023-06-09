@@ -6,7 +6,7 @@
 
 (defn lens
   "Given a function for getting the focused value from a state
-  (getter) and a function that takes the state and and update
+  (getter) and a function that takes the state and update
   function (setter), constructs a lens."
   ([getter]
    (fn [next]
