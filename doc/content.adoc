@@ -80,10 +80,10 @@ We can generalize the getting and setting using *lenses abstraction*:
 
 (def mylens (l/lens my-getter my-setter))
 
-(l/focus mylens state)
+(l/focus mylens data)
 ;; => 1
 
-(l/over mylens inc state)
+(l/over mylens inc data)
 ;; => {:foo 2 :bar 2}
 ----
 
@@ -96,10 +96,10 @@ are provided with lentes.
 ----
 (def mylens (l/key :foo))
 
-(l/focus mylens state)
+(l/focus mylens data)
 ;; => 1
 
-(l/over mylens inc state)
+(l/over mylens inc data)
 ;; => {:foo 2 :bar 2}
 ----
 
