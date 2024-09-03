@@ -14,7 +14,7 @@
        ([s]
         (next (getter s)))
        ([s f]
-        (throw (ex-info "Read only lense!" {}))))))
+        (throw (ex-info "Read only lens!" {}))))))
   ([getter setter]
    (fn [next]
      (fn
@@ -74,10 +74,10 @@
 ;; lenses
 
 (defn passes
-  "Given a predicate, return a lens that focuses in an element only
-  if passes the predicate.
+  "Given a predicate, return a lens that focuses on an element only
+  if it passes the predicate.
 
-  The lens is not well-behaved, depens on the outcome of the predicate."
+  The lens is not well-behaved, it depends on the outcome of the predicate."
   [applies?]
   (lens (fn [s]
           (when (applies? s)
@@ -166,20 +166,27 @@
 
      clojure.lang.IAtom
      (reset [self newval]
-       (swap! src #(put lens newval %))
-       (deref self))
+       (focus lens (swap! src #(put lens newval %))))
      (swap [self f]
-       (swap! src (fn [s] (over lens f s)))
-       (deref self))
+       (focus lens (swap! src (fn [s] (over lens f s)))))
      (swap [self f x]
-       (swap! src (fn [s] (over lens #(f % x) s)))
-       (deref self))
+       (focus lens (swap! src (fn [s] (over lens #(f % x) s)))))
      (swap [self f x y]
-       (swap! src (fn [s] (over lens #(f % x y) s)))
-       (deref self))
+       (focus lens (swap! src (fn [s] (over lens #(f % x y) s)))))
      (swap [self f x y more]
-       (swap! src (fn [s] (over lens #(apply f % x y more) s)))
-       (deref self))
+       (focus lens (swap! src (fn [s] (over lens #(apply f % x y more) s)))))
+
+     clojure.lang.IAtom2
+     (resetVals [self newval]
+       (mapv (partial focus lens) (swap-vals! src #(put lens newval %))))
+     (swapVals [self f]
+       (mapv (partial focus lens) (swap-vals! src (fn [s] (over lens f s)))))
+     (swapVals [self f x]
+       (mapv (partial focus lens) (swap-vals! src (fn [s] (over lens #(f % x) s)))))
+     (swapVals [self f x y]
+       (mapv (partial focus lens) (swap-vals! src (fn [s] (over lens #(f % x y) s)))))
+     (swapVals [self f x y more]
+       (mapv (partial focus lens) (swap-vals! src (fn [s] (over lens #(apply f % x y more) s)))))
 
      clojure.lang.IRef
      (addWatch [self key cb]
@@ -347,20 +354,20 @@
          (remove-watch src id)))))
 
 (defn derive
-  "Create a derived atom from an other atom with the provided lense.
+  "Create a derived atom from another atom with the provided lens.
 
-  The returned atom is lazy, so no code is executed until user
+  The returned atom is lazy, so no code is executed until the user
   requires it.
 
   By default the derived atom does not trigger updates if the data
-  does not affects to it (determined by lense), but this behavior can
-  be deactivated passing `:equals?` to `false` on the third options
+  does not affect it (determined by lens), but this behavior can
+  be deactivated by passing `:equals?` to `false` as the third options
   parameter. You also may pass `=` as `equals?` parameter if you want
   value comparison instead of reference comparison with `identical?`.
 
-  You can create expliclitly read only refs (not atoms, because the
+  You can explicitly create read only refs (not atoms, because the
   returned object satisifies watchable and ref but not atom interface)
-  passing `:read-only?` as `true` as option on the optional third
+  by passing `:read-only?` as `true` as option on the optional third
   parameter."
   ([lens src]
    (derive lens src nil))
