@@ -2,6 +2,10 @@
 
 ## Version 1.4.0-SNAPSHOT
 
+Date: 2024-09-03
+
+- Improved docs (thank you @blak3mill3r, @ComedyTomedy, @luposlip, and @rgkirch).
+
 Date: 2020-01-07
 
 - Fix internal cache race conditions.
