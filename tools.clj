@@ -1,11 +1,15 @@
 (require '[clojure.java.shell :as shell])
-(require '[figwheel.main.api :as figwheel])
-(require '[cljs.build.api :as api])
+
+(require '[cljs.build.api :as api]
+         '[cljs.repl :as repl]
+         '[cljs.repl.node :as node])
 
 (require '[rebel-readline.core]
          '[rebel-readline.clojure.main]
          '[rebel-readline.clojure.line-reader]
-         '[rebel-readline.clojure.service.local])
+         '[rebel-readline.clojure.service.local]
+         '[rebel-readline.cljs.service.local]
+         '[rebel-readline.cljs.repl])
 
 (defmulti task first)
 
@@ -16,7 +20,7 @@
     (println "Unknown or missing task. Choose one of:" interposed)
     (System/exit 1)))
 
-(defmethod task "repl"
+(defmethod task "repl:jvm"
   [args]
   (rebel-readline.core/with-line-reader
     (rebel-readline.clojure.line-reader/create
@@ -25,52 +29,51 @@
      :prompt (fn []) ;; prompt is handled by line-reader
      :read (rebel-readline.clojure.main/create-repl-read))))
 
+(defmethod task "repl:node"
+  [args]
+  (rebel-readline.core/with-line-reader
+    (rebel-readline.clojure.line-reader/create
+     (rebel-readline.cljs.service.local/create))
+    (cljs.repl/repl
+     (node/repl-env)
+     :prompt (fn []) ;; prompt is handled by line-reader
+     :read (rebel-readline.cljs.repl/create-repl-read)
+     :output-dir "out"
+     :cache-analysis false)))
+
 (def build-options
   {:main 'lentes.tests
    :output-to "target/tests.js"
    :source-map "target/tests.js.map"
    :output-dir "target/tests"
+   :optimizations :advanced
    :target :nodejs
    :pretty-print false
    :pseudo-names false
    :verbose true})
 
-(defn build
-  [optimizations]
-  (api/build (api/inputs "src" "test")
-             (cond->  (assoc build-options :optimizations optimizations)
-               (= optimizations :none) (assoc :source-map true))))
-
-(defmethod task "build"
-  [[_ type]]
-  (case type
-    (nil "none") (build :none)
-    "simple"     (build :simple)
-    "advanced"   (build :advanced)
-    (do (println "Unknown argument to test task:" type)
-        (System/exit 1))))
-
-(require '[badigeon.jar])
-(require '[badigeon.deploy])
-
-(defmethod task "jar"
+(defmethod task "build:tests"
   [args]
-  (badigeon.jar/jar 'funcool/lentes
-                    {:mvn/version "1.3.0-SNAPSHOT"}
-                    {:out-path "target/lentes.jar"
-                     :mvn/repos '{"clojars" {:url "https://repo.clojars.org/"}}
-                     :allow-all-dependencies? false}))
+  (api/build (api/inputs "src" "test") build-options))
 
-(defmethod task "deploy"
+(defmethod task "watch:tests"
   [args]
-  (let [;; Artifacts are maps with a required :file-path key and an optional :extension key
-        artifacts [{:file-path "target/lentes.jar" :extension "jar"}
-                   {:file-path "pom.xml" :extension "pom"}]]
-    (badigeon.deploy/deploy
-     'funcool/lentes "1.3.0-SNAPSHOT"
-     artifacts
-     {:id "clojars" :url "https://repo.clojars.org/"}
-     {:allow-unsigned? true})))
+  (println "Start watch loop...")
+  (letfn [(run-tests []
+            (let [{:keys [out err]} (shell/sh "node" "out/tests.js")]
+              (println out err)))
+          (start-watch []
+            (try
+              (api/watch (api/inputs "src" "test")
+                         (assoc build-options
+                                :watch-fn run-tests
+                                :source-map true
+                                :optimizations :none))
+              (catch Exception e
+                (println "ERROR:" e)
+                (Thread/sleep 2000)
+                start-watch)))]
+    (trampoline start-watch)))
 
 ;;; Build script entrypoint. This should be the last expression.
 

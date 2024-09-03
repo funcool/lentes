@@ -224,6 +224,7 @@
     (t/is (= @fsource 0))
 
     #?@(:clj  [(t/is (instance? clojure.lang.IAtom fsource))
+               (t/is (instance? clojure.lang.IAtom2 fsource))
                (t/is (instance? clojure.lang.IDeref fsource))
                (t/is (instance? clojure.lang.IRef fsource))]
         :cljs [(t/is (satisfies? IDeref fsource))
@@ -245,6 +246,7 @@
     (t/is (= @fsource 0))
 
     #?@(:clj  [(t/is (not (instance? clojure.lang.IAtom fsource)))
+               (t/is (not (instance? clojure.lang.IAtom2 fsource)))
                (t/is (instance? clojure.lang.IDeref fsource))
                (t/is (instance? clojure.lang.IRef fsource))]
         :cljs [(t/is (satisfies? IDeref fsource))

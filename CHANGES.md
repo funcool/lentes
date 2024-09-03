@@ -1,5 +1,42 @@
 # Changelog #
 
+## Version 1.4.0-SNAPSHOT
+
+Date: 2020-01-07
+
+- Fix internal cache race conditions.
+- Add Atom2 impl (thanks to @jellelicht).
+
+
+## Version 1.3.3 ##
+
+Date: 2019-10-22
+
+- Fix jvm impl (bug introduced in previous commits).
+
+
+## Version 1.3.2 ##
+
+Date: 2019-10-22
+
+Same as 1.3.1 (just docs updates).
+
+
+## Version 1.3.1 ##
+
+Date: 2019-10-22
+
+Same as 1.3.0 (just docs updates).
+
+
+## Version 1.3.0 ##
+
+Date: 2019-10-22
+
+- Improve equality checking on derived atoms.
+- Minor code/performance improvements.
+
+
 ## Version 1.2.0 ##
 
 Date: 2016-09-30
