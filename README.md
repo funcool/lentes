@@ -1,10 +1,9 @@
 # lentes - functional references for clojure(script) #
 
-[![Travis Badge](https://img.shields.io/travis/funcool/lentes/master.svg)](https://travis-ci.org/funcool/lentes "Travis Badge")
-
-[![Clojars Project](http://clojars.org/funcool/lentes/latest-version.svg)](http://clojars.org/funcool/lentes)
-
-
-## Documentation ##
+[![Clojars project][Clojars SVG]][Clojars URL]
 
 **Documentation**: https://cljdoc.org/d/funcool/lentes/CURRENT
+
+<!-- Project -->
+[Clojars SVG]: https://img.shields.io/clojars/v/funcool/lentes.svg
+[Clojars URL]: https://clojars.org/funcool/lentes
